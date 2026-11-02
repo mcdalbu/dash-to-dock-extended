@@ -5,6 +5,11 @@ de Michele G. e colaboradores, mantido por [mcdalbu](https://github.com/mcdalbu)
 Não é uma versão oficial do projeto original.
 Base: commit `2dfae34` (versão upstream 110).
 
+Versão estável: **25**.
+
+Instalação: `gnome-extensions install --force dash-to-dock-soft@local_v25.zip`.
+Encerre a sessão e entre novamente após atualizar.
+
 ## Novas opções
 
 Em **Preferências → Aparência**:
@@ -470,3 +475,11 @@ itens dos menus de contexto. A cor acompanha o tema claro/escuro e também vale
 para ícones de aplicativos em foco. Desligar a opção restaura o destaque anterior.
 O estilo se aplica a ícones criados depois e compartilha a folha temporária das
 sombras, sem modificar os estilos inline dos ícones.
+
+## Versão estável 25
+
+Publica os recursos e correções validados até a beta 25-beta.3: cache dos
+limites do blur, suspensão do rastreamento de janelas quando oculto, cores do
+fundo e destaque dos ícones alinhados aos menus de contexto do GNOME Shell.
+
+Gerar pacote: `make zip-file VERSION=25`.
