@@ -18,5 +18,5 @@
     "settings-schema": "org.gnome.shell.extensions.dash-to-dock-soft",
     "upstream-url": "https://github.com/micheleg/dash-to-dock",
     "fork-maintainer": "mcdalbu",
-    "version-name": "25-beta.1"
+    "version-name": "25-beta.2"
 }

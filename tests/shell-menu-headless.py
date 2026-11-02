@@ -87,6 +87,10 @@ def test():
     output = ROOT / 'validation'
     output.mkdir(exist_ok=True)
     variant = 'shell-menu-native' if os.environ.get('SOFT_TEST_NATIVE') else 'shell-menu'
+    if os.environ.get('SOFT_TEST_LABEL'):
+        variant += '-' + os.environ['SOFT_TEST_LABEL']
+    if os.environ.get('SOFT_TEST_CONTEXT_COLORS'):
+        variant += '-context-colors'
     if os.environ.get('SOFT_TEST_SHADOW_EDGE'):
         variant += '-shadow-edge'
         if os.environ.get('SOFT_TEST_SHADOW_SIZE'):
@@ -159,7 +163,7 @@ def test():
 
         evaluate('(async()=>{globalThis.extension = Main.extensionManager.lookup("dash-to-dock-soft@local").stateObj; '
                  'globalThis.dockModule = await import(extension.dir.get_child("docking.js").get_uri()); '
-                 'globalThis.manager = dockModule.DockManager; Main.overview.hide();})()')
+                 'globalThis.PM = await import("resource:///org/gnome/shell/ui/popupMenu.js"); globalThis.manager = dockModule.DockManager; Main.overview.hide();})()')
         time.sleep(1)
         evaluate('''(() => {
             const St = imports.gi.St;
@@ -243,6 +247,43 @@ def test():
                  'shadow:s?{x:s.xoffset,y:s.yoffset,blur:s.blur,spread:s.spread,color:c(s.color),inset:s.inset}:null}; };')
         evaluate('globalThis.fillValues=actor=>{const c=actor.get_theme_node().get_background_color(); '
                  'return [c.red,c.green,c.blue,c.alpha];};')
+        if os.environ.get('SOFT_TEST_CONTEXT_COLORS'):
+            evaluate("globalThis.referenceMenu = new PM.PopupMenu(dock, 0.5, 2); "
+                     "referenceMenu.actor.add_style_class_name('app-menu'); "
+                     "Main.uiGroup.add_child(referenceMenu.actor);referenceMenu.actor.hide(); "
+                     "globalThis.referenceSeparator = new PM.PopupSeparatorMenuItem(); "
+                     "referenceMenu.addMenuItem(referenceSeparator); "
+                     "globalThis.testSeparator = new imports.gi.St.Widget({style_class:'dash-separator'}); "
+                     "dock.dash._separator = testSeparator;dock.dash._box.add_child(testSeparator);")
+            for theme in ['dark', 'light']:
+                evaluate(f'new Gio.Settings({{schema_id:"org.gnome.desktop.interface"}})'
+                         f'.set_string("color-scheme","prefer-{theme}");')
+                for builtin in [False, True]:
+                    evaluate(f'manager.settings.set_boolean("apply-custom-theme",{str(builtin).lower()});')
+                    time.sleep(0.6)
+                    check(f'{theme}-{builtin}-context-fill',
+                          'JSON.stringify(fillValues(background).slice(0,3)) === '
+                          'JSON.stringify(fillValues(referenceMenu.box).slice(0,3))')
+                    results[f'{theme}-{builtin}-separator-values'] = evaluate(
+                        '[testSeparator===dock.dash._separator, fillValues(testSeparator), fillValues(referenceSeparator._separator), '
+                        'fillValues(dock._themeManager._colorSeparator._separator)]')
+                    check(f'{theme}-{builtin}-context-separator',
+                          'JSON.stringify(fillValues(testSeparator)) === '
+                          'JSON.stringify(fillValues(referenceSeparator._separator))')
+            evaluate('manager.settings.set_boolean("shell-menu-colors",false);')
+            time.sleep(0.4)
+            check('separator-style-restored', '!testSeparator.get_style()')
+            evaluate('manager.settings.set_boolean("shell-menu-colors",true); '
+                     'testSeparator.destroy();dock.dash._separator=null; '
+                     'globalThis.testSeparator=new imports.gi.St.Widget({style_class:"dash-separator"}); '
+                     'dock.dash._separator=testSeparator;dock.dash._box.add_child(testSeparator);')
+            time.sleep(0.4)
+            check('new-separator-context-color',
+                  'JSON.stringify(fillValues(testSeparator)) === '
+                  'JSON.stringify(fillValues(referenceSeparator._separator))')
+            results['passed'] = True
+            print(json.dumps(results, indent=2))
+            return
         if os.environ.get('SOFT_TEST_WITH_SHELL_SOFT'):
             evaluate('globalThis.soft = Main.extensionManager.lookup("gnome-shell-soft@local").stateObj; '
                      'globalThis.dock = manager.allDocks[0]; globalThis.background = dock.dash._background; '
@@ -286,7 +327,7 @@ def test():
             check(f'{theme}-actual-opacity',
                   'Math.abs(background.get_theme_node().get_background_color().alpha - 140) <= 1')
             check(f'{theme}-shell-menu-colors',
-                  'JSON.stringify(fillValues(background).slice(0,3)) === JSON.stringify(fillValues(menu.box).slice(0,3))')
+                  'JSON.stringify(fillValues(background).slice(0,3)) === JSON.stringify(fillValues(dock._themeManager._colorMenu.box).slice(0,3))')
             time.sleep(0.6)
             evaluate('globalThis.menuTrace={styles:0,updates:0,alphas:[]}; '
                      'globalThis.styleTraceId=background.connect("notify::style",()=>menuTrace.styles++); '
@@ -341,13 +382,13 @@ def test():
             time.sleep(0.4)
             evaluate('globalThis.dock=manager.allDocks[0];globalThis.background=dock.dash._background;menu.open();')
             time.sleep(0.4)
-            path = json.dumps(str(output / f'shell-menu-{theme}.png'))
+            path = json.dumps(str(output / f'{variant}-{theme}.png'))
             evaluate(f'(async()=>{{const stream=Gio.File.new_for_path({path}).replace(null,false, '
                      'Gio.FileCreateFlags.REPLACE_DESTINATION,null); await new Shell.Screenshot().screenshot(false,stream); '
                      'stream.close(null); return true;})()')
             evaluate('menu.close();')
-        evaluate('globalThis.colorTestStyle=menu.box.get_style(); '
-                 'menu.box.set_style("background-color: rgb(32,84,128);"); '
+        evaluate('globalThis.colorTestStyle=dock._themeManager._colorMenu.box.get_style(); '
+                 'dock._themeManager._colorMenu.box.set_style("background-color: rgb(32,84,128);"); '
                  'manager.settings.set_string("background-color","rgb(197,43,71)"); '
                  'manager.settings.set_boolean("custom-background-color",true);')
         time.sleep(0.4)
@@ -364,7 +405,7 @@ def test():
         check('shell-colors-independent-of-outline',
               'JSON.stringify(fillValues(background)) === "[32,84,128,140]" && '
               '!background.get_style().includes("box-shadow")')
-        evaluate('menu.box.set_style("background-color: rgb(61,102,43);");')
+        evaluate('dock._themeManager._colorMenu.box.set_style("background-color: rgb(61,102,43);");')
         time.sleep(0.4)
         check('colors-only-follows-live-menu-color', 'JSON.stringify(fillValues(background)) === "[61,102,43,140]"')
         for mode in [0,3]:
@@ -380,7 +421,7 @@ def test():
                  'manager.settings.set_boolean("shell-menu-style",true); '
                  'manager.settings.set_enum("transparency-mode",1); '
                  'manager.settings.reset("custom-background-color");manager.settings.reset("background-color"); '
-                 'menu.box.set_style(colorTestStyle);')
+                 'dock._themeManager._colorMenu.box.set_style(colorTestStyle);')
         time.sleep(0.4)
         # Profile styling must keep the original Dash to Dock layout margins.
         for compact, extended in [(False, False), (True, False), (False, True)]:

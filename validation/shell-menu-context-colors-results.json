@@ -1,0 +1,99 @@
+{
+  "own-identity": true,
+  "profile-default": true,
+  "dark-False-context-fill": true,
+  "dark-False-separator-values": [
+    true,
+    [
+      255,
+      255,
+      255,
+      25
+    ],
+    [
+      255,
+      255,
+      255,
+      25
+    ],
+    [
+      255,
+      255,
+      255,
+      25
+    ]
+  ],
+  "dark-False-context-separator": true,
+  "dark-True-context-fill": true,
+  "dark-True-separator-values": [
+    true,
+    [
+      255,
+      255,
+      255,
+      25
+    ],
+    [
+      255,
+      255,
+      255,
+      25
+    ],
+    [
+      255,
+      255,
+      255,
+      25
+    ]
+  ],
+  "dark-True-context-separator": true,
+  "light-False-context-fill": true,
+  "light-False-separator-values": [
+    true,
+    [
+      34,
+      34,
+      38,
+      38
+    ],
+    [
+      34,
+      34,
+      38,
+      38
+    ],
+    [
+      34,
+      34,
+      38,
+      38
+    ]
+  ],
+  "light-False-context-separator": true,
+  "light-True-context-fill": true,
+  "light-True-separator-values": [
+    true,
+    [
+      34,
+      34,
+      38,
+      38
+    ],
+    [
+      34,
+      34,
+      38,
+      38
+    ],
+    [
+      34,
+      34,
+      38,
+      38
+    ]
+  ],
+  "light-True-context-separator": true,
+  "separator-style-restored": true,
+  "new-separator-context-color": true,
+  "passed": true
+}

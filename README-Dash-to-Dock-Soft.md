@@ -445,3 +445,18 @@ Esta beta reduz trabalho de JavaScript; não há medição de ganho percentual n
 Gerar pacote: `make zip-file VERSION=25-beta.1`.
 O pacote mantém o UUID e as configurações da versão estável; substitui essa versão
 quando instalado. Para voltar, reinstale o pacote v24.
+
+
+## Beta 25-beta.2: cores dos menus de contexto
+
+A opção **Usar as cores dos menus do Shell** agora usa a paleta dos menus de
+contexto dos ícones do dash, em vez do fundo do Quick Settings. O preenchimento
+mantém a opacidade configurada no dock. O separador entre favoritos e aplicativos
+abertos usa a cor e o alfa do separador desses menus, inclusive após trocar entre
+os temas claro e escuro ou recriar o separador. Desligar a opção restaura o estilo
+anterior e a cor personalizada salva. Contorno, cantos e sombra continuam sendo
+controlados separadamente pela opção de estilo dos menus.
+
+Validação dedicada em uma sessão isolada do GNOME Shell 50:
+`SOFT_TEST_CONTEXT_COLORS=1 python3 tests/shell-menu-headless.py`.
+Pacote: `dash-to-dock-soft@local_v25-beta.2.zip`.

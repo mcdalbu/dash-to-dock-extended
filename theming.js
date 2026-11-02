@@ -11,7 +11,7 @@ import {
     St,
 } from './dependencies/gi.js';
 
-import {Main} from './dependencies/shell/ui.js';
+import {Main, PopupMenu} from './dependencies/shell/ui.js';
 import {LoginManager} from './dependencies/shell/misc.js';
 import {loadBlurBackend, applyBlurParameters, opacityFraction} from './blurBackend.js';
 import {BlurRedrawGuard} from './blurRedrawGuard.js';
@@ -72,27 +72,29 @@ function applyDockSurfaceStyle(dock) {
     let style = background.get_style() || '';
     if (style && !style.trimEnd().endsWith(';'))
         style += ';';
-    const menu = settings.shellMenuStyle || settings.shellMenuColors ? getShellMenuBox() : null;
+    const menu = settings.shellMenuStyle ? getShellMenuBox() : null;
     if (menu && settings.shellMenuStyle) {
         const scale = St.ThemeContext.get_for_stage(global.stage).scale_factor;
         style += shellMenuSurfaceStyle(menu.get_theme_node(), scale,
             settings.shellMenuKeepDockRadius, settings.dockShadowIntensity, settings.dockShadowSize);
     } else if (settings.dockOutline) {
-        const color = (settings.shellMenuColors && menu ? menu : background)
+        const color = (settings.shellMenuColors && dock._themeManager?._colorMenu
+            ? dock._themeManager._colorMenu.box : background)
             .get_theme_node().get_background_color();
         const luminance = (0.2126 * color.red + 0.7152 * color.green + 0.0722 * color.blue) / 255;
         const alpha = settings.dockOutlineIntensity / 100;
         const borderColor = luminance > 0.5 ? `rgba(0, 0, 0, ${alpha})` : `rgba(255, 255, 255, ${alpha})`;
         style += `border: 1px solid ${borderColor};`;
     }
-    if (menu && settings.shellMenuColors) {
-        const color = menu.get_theme_node().get_background_color();
+    const colorMenu = settings.shellMenuColors ? dock._themeManager?._colorMenu?.box : null;
+    if (colorMenu) {
+        const color = colorMenu.get_theme_node().get_background_color();
         const alpha = settings.transparencyMode === TransparencyMode.FIXED
             ? opacityFraction(settings.backgroundOpacity, 1)
             : background.get_theme_node().get_background_color().alpha / 255;
         style += `background-color: rgba(${color.red}, ${color.green}, ${color.blue}, ${alpha});`;
     }
-    if (settings.dockBlur || menu && settings.shellMenuColors)
+    if (settings.dockBlur || colorMenu)
         style += 'background-image: none;';
     background.set_style(style);
 }
@@ -107,6 +109,22 @@ export class ThemeManager {
         this._actor = dock;
         this._dash = dock.dash;
         this._blurEffect = null;
+
+        // Resolve the same theme hierarchy as the stock dash icon context menu.
+        // Keep this probe hidden and outside the dock's CSS selectors.
+        this._colorMenu = new PopupMenu.PopupMenu(dock, 0.5, Utils.getPosition());
+        this._colorMenu.actor.add_style_class_name('app-menu');
+        Main.uiGroup.add_child(this._colorMenu.actor);
+        this._colorMenu.actor.hide();
+        this._colorSeparator = new PopupMenu.PopupSeparatorMenuItem();
+        this._colorMenu.addMenuItem(this._colorSeparator);
+        for (const actor of [this._colorMenu.box, this._colorSeparator._separator]) {
+            this._signalsHandler.add(
+                [actor, 'style-changed', () => this._queueUpdateShellMenuStyle()],
+                [actor, 'notify::style', () => this._queueUpdateShellMenuStyle()]);
+        }
+        this._signalsHandler.add(this._dash._box, 'child-added',
+            () => this._updateSeparatorColor());
 
         // initialize colors with generic values
         this._customizedBackground = {red: 0, green: 0, blue: 0, alpha: 0};
@@ -178,6 +196,8 @@ export class ThemeManager {
             return;
         this._destroyed = true;
         this._disableIconShadow();
+        this._restoreSeparatorColor();
+        this._colorMenu?.destroy();
         this._disableBlur();
         this.emit('destroy');
         this._transparency.destroy();
@@ -200,14 +220,21 @@ export class ThemeManager {
         if (!menu)
             return null;
         const node = menu.get_theme_node();
-        const color = node.get_background_color();
         const scale = St.ThemeContext.get_for_stage(global.stage).scale_factor;
         // Dock opacity is independent of the menu opacity. In particular,
         // ignore Gnome Shell Soft briefly restoring its original menu fill.
         const surface = settings.shellMenuStyle ? shellMenuSurfaceStyle(
             node, scale, settings.shellMenuKeepDockRadius,
             settings.dockShadowIntensity, settings.dockShadowSize) : '';
-        const fill = settings.shellMenuColors ? `${color.red},${color.green},${color.blue}` : '';
+        // Hidden popup descendants need their parent styles resolved first
+        // when Shell replaces the theme (in particular dark/light switching).
+        for (const actor of [this._colorMenu.actor, this._colorMenu.box,
+            this._colorSeparator.actor, this._colorSeparator._separator])
+            actor.ensure_style();
+        const fill = settings.shellMenuColors ? [
+            this._colorMenu.box.get_theme_node().get_background_color().to_string(),
+            this._colorSeparator._separator.get_theme_node().get_background_color().to_string(),
+        ].join(';') : '';
         return `${fill};${surface}`;
     }
 
@@ -274,7 +301,7 @@ export class ThemeManager {
     }
 
     _getDefaultColors() {
-        const menu = Docking.DockManager.settings.shellMenuColors ? getShellMenuBox() : null;
+        const menu = Docking.DockManager.settings.shellMenuColors ? this._colorMenu?.box : null;
         if (menu) {
             const node = menu.get_theme_node();
             return [node.get_background_color(), node.get_border_color(St.Side.TOP)];
@@ -312,7 +339,7 @@ export class ThemeManager {
 
         const {settings} = Docking.DockManager;
 
-        if (settings.customBackgroundColor && !(settings.shellMenuColors && getShellMenuBox())) {
+        if (settings.customBackgroundColor && !(settings.shellMenuColors && this._colorMenu)) {
             // When applying a custom color, we need to check the alpha value,
             // if not the opacity will always be overridden by the color below.
             // Note that if using 'dynamic' transparency modes,
@@ -854,17 +881,53 @@ export class ThemeManager {
         }
     }
 
+    _restoreSeparatorColor() {
+        if (this._styledSeparator) {
+            this._styledSeparator.disconnect(this._separatorDestroyId);
+            this._styledSeparator.set_style(this._separatorOriginalStyle);
+        }
+        this._styledSeparator = null;
+        this._separatorDestroyId = 0;
+    }
+
+    _updateSeparatorColor() {
+        const separator = this._dash._separator;
+        if (this._styledSeparator && this._styledSeparator !== separator)
+            this._restoreSeparatorColor();
+        if (!Docking.DockManager.settings.shellMenuColors) {
+            this._restoreSeparatorColor();
+            return;
+        }
+        if (!separator || !this._colorSeparator)
+            return;
+        if (!this._styledSeparator) {
+            this._styledSeparator = separator;
+            this._separatorOriginalStyle = separator.get_style();
+            this._separatorDestroyId = separator.connect('destroy', () => {
+                this._styledSeparator = null;
+                this._separatorDestroyId = 0;
+            });
+        }
+        const color = this._colorSeparator._separator.get_theme_node().get_background_color();
+        const original = this._separatorOriginalStyle?.trim() || '';
+        const prefix = original && !original.endsWith(';') ? `${original};` : original;
+        separator.set_style(`${prefix}background-color: ` +
+            `rgba(${color.red}, ${color.green}, ${color.blue}, ${color.alpha / 255});`);
+    }
+
     updateCustomTheme() {
         if (!this._actor.mapped)
             return;
 
+        const signature = this._getShellMenuSignature();
         this._updateCustomStyleClasses();
         this._updateDashOpacity();
         this._updateDashColor();
         this._adjustTheme();
         applyDockSurfaceStyle(this._actor);
+        this._updateSeparatorColor();
         this._updateBlur();
-        this._shellMenuSignature = this._getShellMenuSignature();
+        this._shellMenuSignature = signature;
         this.emit('updated');
     }
 
