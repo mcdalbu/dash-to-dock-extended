@@ -472,6 +472,22 @@ b.manager._trackBlurWindow(window);
 const record = b.manager._blurWindows.get(window);
 const bindings = b.signalBindings.get(record.label);
 const damage = bindings.find(binding => binding[1] === 'damaged')[2];
+// A burst of window damage reuses one backdrop rectangle, then invalidates it
+// on geometry/scale updates instead of reading actor transforms per event.
+b.manager._blurBounds = null;
+let boundsReads = 0;
+const readBlurPosition = b.manager._blurActor.get_transformed_position;
+b.manager._blurActor.get_transformed_position = function () {
+    boundsReads++;
+    return readBlurPosition.call(this);
+};
+for (let i = 0; i < 20; i++) damage();
+assert.equal(boundsReads, 1, 'Share backdrop bounds across a window damage burst');
+b.manager._updateBlurGeometry();
+damage();
+assert(boundsReads > 1, 'Geometry checks invalidate the cached backdrop');
+b.manager._blurActor.get_transformed_position = readBlurPosition;
+
 const geometry = bindings.find(binding => binding[1] === 'notify::allocation')[2];
 const scheduled = b.manager._blurRepaintLater;
 const repaintCount = b.manager._blurEffect.repaints;
@@ -580,6 +596,11 @@ transformed.manager.destroy();
 const opaque = createDock();
 opaque.manager._updateBlur();
 flushLaters();
+
+const originalWindowActors = sandbox.global.get_window_actors;
+sandbox.global.get_window_actors = () => [window];
+opaque.manager._trackBlurWindow(window);
+const opaqueWindowLabel = opaque.manager._blurWindows.get(window).label;
 const opaqueFrame = handler(opaque, sandbox.global.stage, 'before-update');
 const opaqueAfter = handler(opaque, sandbox.global.stage, 'after-update');
 monotonicTime += 200000;
@@ -590,6 +611,10 @@ monotonicTime += 150000;
 opaqueFrame(undefined, view);
 assert(!opaque.manager._blurActor.mapped, 'Cull blur completely covered by the settled fill');
 assert.equal(drawFlags, 0, 'Opaque surfaces do not request full-monitor redraws');
+assert.equal(opaque.manager._blurWindows.size, 0, 'Covered blur releases window records');
+assert(!opaque.signalBindings.has(opaqueWindowLabel), 'Covered blur disconnects window handlers');
+opaque.manager._trackBlurWindow(window);
+assert.equal(opaque.manager._blurWindows.size, 0, 'New windows remain untracked while covered');
 let coverageReads = 0;
 const opaqueNode = opaque.background.get_theme_node;
 opaque.background.get_theme_node = () => {coverageReads++; return opaqueNode();};
@@ -605,6 +630,8 @@ assert.equal(opaque.manager._blurEffect.repaints, opaqueRepaints);
 opaque.background.opacity = 128;
 opaqueFrame(undefined, view);
 assert(opaque.manager._blurActor.mapped, 'A fading surface still needs its backdrop');
+assert(opaque.manager._blurWindows.has(window), 'Revealing blur restores window tracking');
+sandbox.global.get_window_actors = originalWindowActors;
 opaqueAfter();
 flushLaters();
 opaque.background.opacity = 255;

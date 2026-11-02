@@ -1,0 +1,22 @@
+{
+  "version": "25-beta.1",
+  "date": "2026-11-01",
+  "scope": "Blur bounds cache and suspended window tracking; redraw guard preserved",
+  "validation": {
+    "dock_effects_and_cleanup": "passed",
+    "dock_resume_and_autohide": "passed",
+    "schemas_and_preferences_layout": "passed",
+    "gnome_integrated": "passed",
+    "menus_rounded_backend": "passed",
+    "menus_native_backend": "passed",
+    "menus_idle_frames_open": 0,
+    "menus_idle_frames_opaque": 0,
+    "dock_bounds_reads_per_20_window_damage_events": 1
+  },
+  "limitations": [
+    "No GPU performance benchmark or physical suspend test",
+    "ESLint was unavailable; behavioral tests and schema/package checks passed"
+  ],
+  "package": "dash-to-dock-soft@local_v25-beta.1.zip",
+  "sha256": "e3e467bd176ad41384ad36113f23f0e04d872d580723a48554b1fa374e238ddd"
+}

@@ -428,3 +428,20 @@ Configurações das duas extensões continuam independentes. Para comparar o
 resultado, use os mesmos raio, brilho e opacidade, além da mesma cor de fundo.
 O conteúdo amostrado e as dimensões das superfícies podem produzir diferenças
 visuais mesmo com parâmetros iguais.
+
+## Beta 25-beta.1: custo do blur
+
+O dock reutiliza os limites de amostragem nas notificações de janela entre
+verificações de geometria; o cache é invalidado nas etapas de frame, em mudanças
+de geometria e nas atualizações de intensidade/escala. O acompanhamento das
+janelas é desconectado enquanto o efeito está encoberto, não mapeado, em suspensão
+ou bloqueado, e reconstruído quando pode ser mostrado novamente. A geometria
+encoberta não faz conversões de coordenadas.
+
+As verificações de transformação durante os frames existentes e a proteção contra
+redesenho parcial continuam ativas. Não há redução de qualidade nem limite de FPS.
+Esta beta reduz trabalho de JavaScript; não há medição de ganho percentual na GPU.
+
+Gerar pacote: `make zip-file VERSION=25-beta.1`.
+O pacote mantém o UUID e as configurações da versão estável; substitui essa versão
+quando instalado. Para voltar, reinstale o pacote v24.

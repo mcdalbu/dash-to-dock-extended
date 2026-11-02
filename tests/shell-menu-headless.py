@@ -624,6 +624,7 @@ def test():
         time.sleep(0.2)
         check('opaque-blur-hidden', 'surfaceValues(background).corners.every(v=>v===0) && '
               '!dock._themeManager._blurActor.mapped && !dock._themeManager._blurRepaintLater')
+        check('opaque-no-window-signals', 'dock._themeManager._blurWindows.size === 0 && !dock._themeManager._blurTrackingWindows')
         check('opaque-no-redraw-guard', '''(() => {
             const Clutter=imports.gi.Clutter;
             return (Clutter.get_debug_flags()[1] & Clutter.DrawDebugFlag.DISABLE_CLIPPED_REDRAWS)===0;
@@ -635,7 +636,7 @@ def test():
         assert results['idle-frames-opaque'] <= 2
         evaluate('manager.settings.set_double("background-opacity",0.55);')
         time.sleep(0.4)
-        check('transparent-blur-restored', 'dock._themeManager._blurActor.mapped')
+        check('transparent-blur-restored', 'dock._themeManager._blurActor.mapped && dock._themeManager._blurTrackingWindows')
 
         evaluate('extension.disable();')
         check('disable-cleanup', '!Main.uiGroup.get_children().some(a=>a.name === "dashtodockContainer")')

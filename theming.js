@@ -403,6 +403,7 @@ export class ThemeManager {
             corners.every(corner => corner <= radius);
         const wasVisible = this._blurGroup.visible;
         this._blurGroup.visible = !covered;
+        this._syncBlurWindowTracking();
         if (covered) {
             this._blurRedrawGuard?.end();
             if (this._blurRepaintLater) {
@@ -444,22 +445,60 @@ export class ThemeManager {
         this._blurDashActors.delete(actor);
     }
 
+    // Share stage bounds across window events; geometry/settings and frame
+    // boundaries invalidate them so ancestor transforms cannot persist in cache.
+    _getBlurBounds() {
+        if (!this._blurBounds && this._blurActor) {
+            const [x, y] = this._blurActor.get_transformed_position();
+            const [width, height] = this._blurActor.get_transformed_size();
+            const scale = St.ThemeContext.get_for_stage(global.stage).scale_factor;
+            const margin = Math.max(64, Docking.DockManager.settings.dockBlurRadius) * scale;
+            this._blurBounds = {
+                x: x - margin, y: y - margin,
+                right: x + width + margin, bottom: y + height + margin,
+            };
+        }
+        return this._blurBounds;
+    }
+
     _windowIntersectsBlur(actor) {
         if (!actor.mapped || !this._blurActor)
             return false;
         const rect = actor.get_meta_window()?.get_frame_rect();
-        if (!rect)
+        const bounds = this._getBlurBounds();
+        if (!rect || !bounds)
             return false;
-        const [x, y] = this._blurActor.get_transformed_position();
-        const [width, height] = this._blurActor.get_transformed_size();
-        const scale = St.ThemeContext.get_for_stage(global.stage).scale_factor;
-        const margin = Math.max(64, Docking.DockManager.settings.dockBlurRadius) * scale;
-        return rect.x < x + width + margin && rect.x + rect.width > x - margin &&
-            rect.y < y + height + margin && rect.y + rect.height > y - margin;
+        return rect.x < bounds.right && rect.x + rect.width > bounds.x &&
+            rect.y < bounds.bottom && rect.y + rect.height > bounds.y;
+    }
+
+    _refreshBlurWindowIntersections() {
+        this._blurBounds = null;
+        for (const [window, record] of this._blurWindows ?? [])
+            record.affected = this._windowIntersectsBlur(window);
+    }
+
+    _syncBlurWindowTracking() {
+        if (!this._blurWindows)
+            return;
+        const active = this._blurActor?.mapped && this._blurGroup.visible &&
+            !this._blurSleeping && !Main.sessionMode.isLocked && !Main.screenShield?.active;
+        if (active === this._blurTrackingWindows)
+            return;
+        this._blurTrackingWindows = active;
+        this._blurBounds = null;
+        if (active) {
+            for (const actor of global.get_window_actors())
+                this._trackBlurWindow(actor);
+        } else {
+            for (const {label} of this._blurWindows.values())
+                this._signalsHandler.removeWithLabel(label);
+            this._blurWindows.clear();
+        }
     }
 
     _trackBlurWindow(actor) {
-        if (!actor.get_meta_window || this._blurWindows.has(actor))
+        if (!this._blurTrackingWindows || !actor.get_meta_window || this._blurWindows.has(actor))
             return;
         const label = Symbol('blur-window');
         const record = {label, affected: this._windowIntersectsBlur(actor)};
@@ -514,6 +553,7 @@ export class ThemeManager {
         this._trackBlurDashActor(this._dash);
         this._signalsHandler.addWithLabel(Labels.BLUR_DASH,
             [global.stage, 'before-update', (_stage, view) => {
+                this._blurBounds = null;
                 this._syncBlurVisibility();
                 this._blurRedrawGuard.begin(this._blurActor, view);
                 if (GLib.get_monotonic_time() < this._blurStyleUntil)
@@ -522,17 +562,22 @@ export class ThemeManager {
             // Translations/scaling need not emit notify::allocation. Follow
             // the background after layout on frames already being drawn.
             [global.stage, 'before-paint', () => this._updateBlurGeometry()],
-            [global.stage, 'after-update', () => this._blurRedrawGuard.end()]);
+            [global.stage, 'after-update', () => {
+                this._blurBounds = null;
+                this._blurRedrawGuard.end();
+            }]);
         const loginManager = LoginManager.getLoginManager();
         this._blurSleeping = loginManager.preparingForSleep ?? false;
         this._blurRecoveryPending = this._blurSleeping;
         this._signalsHandler.addWithLabel(Labels.BLUR_SESSION,
             [loginManager, 'prepare-for-sleep', (_manager, sleeping) => {
                 this._blurSleeping = sleeping;
+                this._syncBlurWindowTracking();
                 this._blurRedrawGuard.end();
                 this._queueBlurRecovery();
             }],
             [Main.sessionMode, 'updated', () => {
+                this._syncBlurWindowTracking();
                 if (Main.sessionMode.isLocked) {
                     this._blurRecoveryPending = true;
                     this._blurRedrawGuard.end();
@@ -541,6 +586,7 @@ export class ThemeManager {
                 }
             }],
             [this._blurActor, 'notify::mapped', () => {
+                this._syncBlurWindowTracking();
                 if (!this._blurActor.mapped) {
                     this._blurRecoveryPending = true;
                     this._blurRedrawGuard.end();
@@ -558,6 +604,7 @@ export class ThemeManager {
                 });
         }
         this._blurWindows = new Map();
+        this._blurTrackingWindows = false;
         const added = GObject.signal_lookup('child-added', global.window_group)
             ? 'child-added' : 'actor-added';
         const removed = added === 'child-added' ? 'child-removed' : 'actor-removed';
@@ -573,8 +620,7 @@ export class ThemeManager {
                     this._queueBlurRepaint();
             }],
             [global.display, 'restacked', () => this._queueBlurRepaint()]);
-        for (const actor of global.get_window_actors())
-            this._trackBlurWindow(actor);
+        this._syncBlurWindowTracking();
     }
 
     _stopBlurRepaints() {
@@ -604,9 +650,12 @@ export class ThemeManager {
             this._signalsHandler.removeWithLabel(label);
         this._signalsHandler.removeWithLabel(Labels.BLUR_WINDOWS);
         this._blurWindows = null;
+        this._blurTrackingWindows = false;
+        this._blurBounds = null;
     }
 
     _queueBlurGeometry() {
+        this._blurBounds = null;
         if (!this._blurGroup || this._blurGeometryLater)
             return;
         this._blurGeometryLater = Utils.laterAdd(Meta.LaterType.BEFORE_REDRAW, () => {
@@ -616,7 +665,8 @@ export class ThemeManager {
     }
 
     _updateBlurGeometry() {
-        if (!this._blurActor || !this._dash._background.mapped)
+        this._blurBounds = null;
+        if (!this._blurActor?.mapped || !this._dash._background.mapped)
             return;
         const background = this._dash._background;
         const [stageX, stageY] = background.get_transformed_position();
@@ -641,8 +691,7 @@ export class ThemeManager {
             return;
         actor.set_position(x, y);
         actor.set_size(width, height);
-        for (const [window, record] of this._blurWindows ?? [])
-            record.affected = this._windowIntersectsBlur(window);
+        this._refreshBlurWindowIntersections();
         this._queueBlurRepaint();
     }
 
@@ -705,8 +754,7 @@ export class ThemeManager {
         }
         this._syncBlurVisibility(true);
         this._updateBlurGeometry();
-        for (const [window, record] of this._blurWindows ?? [])
-            record.affected = this._windowIntersectsBlur(window);
+        this._refreshBlurWindowIntersections();
         this._queueBlurGeometry();
         this._queueBlurRepaint();
     }
