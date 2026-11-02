@@ -253,6 +253,13 @@ def test():
                      "Main.uiGroup.add_child(referenceMenu.actor);referenceMenu.actor.hide(); "
                      "globalThis.referenceSeparator = new PM.PopupSeparatorMenuItem(); "
                      "referenceMenu.addMenuItem(referenceSeparator); "
+                     "globalThis.referenceHover=new PM.PopupMenuItem('Item'); "
+                     "referenceMenu.addMenuItem(referenceHover);referenceHover.actor.add_style_pseudo_class('hover'); "
+                     "globalThis.hoverContainer=new imports.gi.St.BoxLayout({style_class:'dash-item-container'}); "
+                     "globalThis.hoverButton=new imports.gi.St.Button({style_class:'overview-tile'}); "
+                     "globalThis.hoverIcon=new imports.gi.St.Widget({style_class:'overview-icon',width:32,height:32}); "
+                     "hoverButton.set_child(hoverIcon);hoverContainer.add_child(hoverButton); "
+                     "dock.dash._box.add_child(hoverContainer); "
                      "globalThis.testSeparator = new imports.gi.St.Widget({style_class:'dash-separator'}); "
                      "dock.dash._separator = testSeparator;dock.dash._box.add_child(testSeparator);")
             for theme in ['dark', 'light']:
@@ -261,6 +268,22 @@ def test():
                 for builtin in [False, True]:
                     evaluate(f'manager.settings.set_boolean("apply-custom-theme",{str(builtin).lower()});')
                     time.sleep(0.6)
+                    for kind in ['app-well-app', 'overview-tile', 'show-apps']:
+                        evaluate(f'hoverButton.set_style_class_name("{kind}"); '
+                                 'hoverButton.add_style_pseudo_class("hover");')
+                        time.sleep(0.15)
+                        check(f'{theme}-{builtin}-{kind}-menu-hover',
+                              'JSON.stringify(fillValues(hoverIcon)) === '
+                              'JSON.stringify(fillValues(referenceHover.actor))')
+                        evaluate('hoverButton.add_style_class_name("focused");')
+                        check(f'{theme}-{builtin}-{kind}-focused-menu-hover',
+                              'JSON.stringify(fillValues(hoverIcon)) === '
+                              'JSON.stringify(fillValues(referenceHover.actor))')
+                        evaluate('hoverButton.remove_style_class_name("focused");')
+                        evaluate('hoverButton.remove_style_pseudo_class("hover");')
+                        time.sleep(0.15)
+                        check(f'{theme}-{builtin}-{kind}-hover-cleared',
+                              'fillValues(hoverIcon)[3] === 0')
                     check(f'{theme}-{builtin}-context-fill',
                           'JSON.stringify(fillValues(background).slice(0,3)) === '
                           'JSON.stringify(fillValues(referenceMenu.box).slice(0,3))')
@@ -273,6 +296,11 @@ def test():
             evaluate('manager.settings.set_boolean("shell-menu-colors",false);')
             time.sleep(0.4)
             check('separator-style-restored', '!testSeparator.get_style()')
+            evaluate('hoverButton.add_style_pseudo_class("hover");')
+            time.sleep(0.2)
+            check('hover-style-restored',
+                  'JSON.stringify(fillValues(hoverIcon)) === "[238,238,238,51]"')
+            evaluate('hoverButton.remove_style_pseudo_class("hover");')
             evaluate('manager.settings.set_boolean("shell-menu-colors",true); '
                      'testSeparator.destroy();dock.dash._separator=null; '
                      'globalThis.testSeparator=new imports.gi.St.Widget({style_class:"dash-separator"}); '

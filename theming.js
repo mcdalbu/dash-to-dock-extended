@@ -118,7 +118,10 @@ export class ThemeManager {
         this._colorMenu.actor.hide();
         this._colorSeparator = new PopupMenu.PopupSeparatorMenuItem();
         this._colorMenu.addMenuItem(this._colorSeparator);
-        for (const actor of [this._colorMenu.box, this._colorSeparator._separator]) {
+        this._colorHover = new PopupMenu.PopupMenuItem('');
+        this._colorMenu.addMenuItem(this._colorHover);
+        this._colorHover.actor.add_style_pseudo_class('hover');
+        for (const actor of [this._colorMenu.box, this._colorSeparator._separator, this._colorHover.actor]) {
             this._signalsHandler.add(
                 [actor, 'style-changed', () => this._queueUpdateShellMenuStyle()],
                 [actor, 'notify::style', () => this._queueUpdateShellMenuStyle()]);
@@ -229,11 +232,12 @@ export class ThemeManager {
         // Hidden popup descendants need their parent styles resolved first
         // when Shell replaces the theme (in particular dark/light switching).
         for (const actor of [this._colorMenu.actor, this._colorMenu.box,
-            this._colorSeparator.actor, this._colorSeparator._separator])
+            this._colorSeparator.actor, this._colorSeparator._separator, this._colorHover.actor])
             actor.ensure_style();
         const fill = settings.shellMenuColors ? [
             this._colorMenu.box.get_theme_node().get_background_color().to_string(),
             this._colorSeparator._separator.get_theme_node().get_background_color().to_string(),
+            this._colorHover.actor.get_theme_node().get_background_color().to_string(),
         ].join(';') : '';
         return `${fill};${surface}`;
     }
@@ -809,18 +813,27 @@ export class ThemeManager {
 
     _updateIconShadow() {
         const {settings} = Docking.DockManager;
-        if (!settings.iconShadow) {
+        const menuHover = settings.shellMenuColors && this._colorHover?.actor;
+        if (!settings.iconShadow && !menuHover) {
             this._disableIconShadow();
             return;
         }
 
         // A scoped stylesheet also covers icons created/replaced after startup,
-        // without overwriting their inline styles or generating every possible
-        // combination of the four shadow controls in the bundled stylesheet.
+        // without overwriting their inline styles. Keep menu hover colors and
+        // optional icon shadows in one stylesheet with the same cleanup path.
         this._shadowClass ??= `soft-shadow-profile-${++shadowStyleId}`;
-        const css = `#dashtodockContainer.soft-icon-shadow.${this._shadowClass} .overview-icon StIcon {` +
+        let css = settings.iconShadow ? `#dashtodockContainer.soft-icon-shadow.${this._shadowClass} .overview-icon StIcon {` +
             `icon-shadow: ${settings.iconShadowOffsetX}px ${settings.iconShadowOffsetY}px ` +
-            `${settings.iconShadowBlur}px rgba(0, 0, 0, ${settings.iconShadowIntensity / 100});}`;
+            `${settings.iconShadowBlur}px rgba(0, 0, 0, ${settings.iconShadowIntensity / 100});}` : '';
+        if (menuHover) {
+            const color = menuHover.get_theme_node().get_background_color();
+            const scope = `#dashtodockContainer.${this._shadowClass} #dash .dash-item-container`;
+            css += `${scope} .app-well-app:hover .overview-icon,` +
+                `${scope} .overview-tile:hover .overview-icon,` +
+                `${scope} .show-apps:hover .overview-icon {` +
+                `background-color: rgba(${color.red}, ${color.green}, ${color.blue}, ${color.alpha / 255}) !important;}`;
+        }
         const theme = St.ThemeContext.get_for_stage(global.stage).get_theme();
         if (this._shadowTheme === theme && this._shadowCss === css)
             return;

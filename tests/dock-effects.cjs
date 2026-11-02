@@ -725,4 +725,27 @@ assert.equal(resumed.manager._blurEffect, null, 'Destroy cannot resurrect blur')
 assert.equal(resumed.signalBindings.size, 0);
 assert.equal(drawFlags, 0);
 
+// Sharing the stylesheet must not couple menu hover colors to icon shadows.
+const hoverDock = createDock();
+hoverDock.manager._colorHover = {actor: {
+    get_theme_node: () => ({get_background_color: () => ({red: 31, green: 42, blue: 53, alpha: 128})}),
+}};
+settings.shellMenuColors = true;
+settings.iconShadow = false;
+hoverDock.manager._updateIconShadow();
+const hoverFile = hoverDock.manager._shadowFile;
+assert(hoverFile, 'Menu hover works with icon shadows disabled');
+assert(!hoverDock.manager._shadowCss.includes('icon-shadow:'));
+settings.iconShadow = true;
+hoverDock.manager._updateIconShadow();
+assert.equal(hoverDock.manager._shadowFile, hoverFile, 'Both effects share one stylesheet');
+assert(hoverDock.manager._shadowCss.includes('icon-shadow:'));
+settings.iconShadow = false;
+hoverDock.manager._updateIconShadow();
+assert.equal(hoverDock.manager._shadowFile, hoverFile, 'Turning shadows off preserves menu hover');
+settings.shellMenuColors = false;
+hoverDock.manager._updateIconShadow();
+assert.equal(hoverDock.manager._shadowFile, null, 'Turning both options off restores theme styles');
+assert(!context.theme.styles.has(hoverFile), 'Stylesheet is unloaded when both effects are disabled');
+
 console.log('PASS: backdrop geometry, adjustable shadows/outline, transparency, hover, suspend/unlock/remap recovery, bounded repaint/cleanup, scale and API compatibility');

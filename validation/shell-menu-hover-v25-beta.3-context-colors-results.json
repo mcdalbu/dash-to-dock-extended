@@ -1,0 +1,136 @@
+{
+  "own-identity": true,
+  "profile-default": true,
+  "dark-False-app-well-app-menu-hover": true,
+  "dark-False-app-well-app-focused-menu-hover": true,
+  "dark-False-app-well-app-hover-cleared": true,
+  "dark-False-overview-tile-menu-hover": true,
+  "dark-False-overview-tile-focused-menu-hover": true,
+  "dark-False-overview-tile-hover-cleared": true,
+  "dark-False-show-apps-menu-hover": true,
+  "dark-False-show-apps-focused-menu-hover": true,
+  "dark-False-show-apps-hover-cleared": true,
+  "dark-False-context-fill": true,
+  "dark-False-separator-values": [
+    true,
+    [
+      255,
+      255,
+      255,
+      25
+    ],
+    [
+      255,
+      255,
+      255,
+      25
+    ],
+    [
+      255,
+      255,
+      255,
+      25
+    ]
+  ],
+  "dark-False-context-separator": true,
+  "dark-True-app-well-app-menu-hover": true,
+  "dark-True-app-well-app-focused-menu-hover": true,
+  "dark-True-app-well-app-hover-cleared": true,
+  "dark-True-overview-tile-menu-hover": true,
+  "dark-True-overview-tile-focused-menu-hover": true,
+  "dark-True-overview-tile-hover-cleared": true,
+  "dark-True-show-apps-menu-hover": true,
+  "dark-True-show-apps-focused-menu-hover": true,
+  "dark-True-show-apps-hover-cleared": true,
+  "dark-True-context-fill": true,
+  "dark-True-separator-values": [
+    true,
+    [
+      255,
+      255,
+      255,
+      25
+    ],
+    [
+      255,
+      255,
+      255,
+      25
+    ],
+    [
+      255,
+      255,
+      255,
+      25
+    ]
+  ],
+  "dark-True-context-separator": true,
+  "light-False-app-well-app-menu-hover": true,
+  "light-False-app-well-app-focused-menu-hover": true,
+  "light-False-app-well-app-hover-cleared": true,
+  "light-False-overview-tile-menu-hover": true,
+  "light-False-overview-tile-focused-menu-hover": true,
+  "light-False-overview-tile-hover-cleared": true,
+  "light-False-show-apps-menu-hover": true,
+  "light-False-show-apps-focused-menu-hover": true,
+  "light-False-show-apps-hover-cleared": true,
+  "light-False-context-fill": true,
+  "light-False-separator-values": [
+    true,
+    [
+      34,
+      34,
+      38,
+      38
+    ],
+    [
+      34,
+      34,
+      38,
+      38
+    ],
+    [
+      34,
+      34,
+      38,
+      38
+    ]
+  ],
+  "light-False-context-separator": true,
+  "light-True-app-well-app-menu-hover": true,
+  "light-True-app-well-app-focused-menu-hover": true,
+  "light-True-app-well-app-hover-cleared": true,
+  "light-True-overview-tile-menu-hover": true,
+  "light-True-overview-tile-focused-menu-hover": true,
+  "light-True-overview-tile-hover-cleared": true,
+  "light-True-show-apps-menu-hover": true,
+  "light-True-show-apps-focused-menu-hover": true,
+  "light-True-show-apps-hover-cleared": true,
+  "light-True-context-fill": true,
+  "light-True-separator-values": [
+    true,
+    [
+      34,
+      34,
+      38,
+      38
+    ],
+    [
+      34,
+      34,
+      38,
+      38
+    ],
+    [
+      34,
+      34,
+      38,
+      38
+    ]
+  ],
+  "light-True-context-separator": true,
+  "separator-style-restored": true,
+  "hover-style-restored": true,
+  "new-separator-context-color": true,
+  "passed": true
+}

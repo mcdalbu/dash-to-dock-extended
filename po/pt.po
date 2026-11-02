@@ -622,8 +622,8 @@ msgstr "Sombras dos ícones"
 msgid "Use Shell menu colors"
 msgstr "Usar as cores dos menus do Shell"
 
-msgid "Use the background and separator colors of the Shell dash icon context menus while keeping the dock opacity."
-msgstr "Usa as cores de fundo e dos separadores dos menus de contexto dos ícones do dash do Shell, mantendo a opacidade do dock."
+msgid "Use the background, separator and hover colors of the Shell dash icon context menus while keeping the dock opacity."
+msgstr "Usa as cores de fundo, dos separadores e do destaque ao passar o mouse dos menus de contexto dos ícones do dash do Shell, mantendo a opacidade do dock."
 
 msgid "Outer shadow size (%)"
 msgstr "Tamanho da sombra externa (%)"

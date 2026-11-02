@@ -460,3 +460,13 @@ controlados separadamente pela opção de estilo dos menus.
 Validação dedicada em uma sessão isolada do GNOME Shell 50:
 `SOFT_TEST_CONTEXT_COLORS=1 python3 tests/shell-menu-headless.py`.
 Pacote: `dash-to-dock-soft@local_v25-beta.2.zip`.
+
+
+## Beta 25-beta.3: destaque dos ícones
+
+Com **Usar as cores dos menus do Shell** ligado, o destaque ao passar o mouse
+sobre os ícones e o botão Mostrar aplicativos usa a cor e o alfa do destaque dos
+itens dos menus de contexto. A cor acompanha o tema claro/escuro e também vale
+para ícones de aplicativos em foco. Desligar a opção restaura o destaque anterior.
+O estilo se aplica a ícones criados depois e compartilha a folha temporária das
+sombras, sem modificar os estilos inline dos ícones.
