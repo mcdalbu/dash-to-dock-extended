@@ -192,7 +192,7 @@ const backendSource = fs.readFileSync(path.join(__dirname, '../blurBackend.js'),
     .replace(/\bexport /g, '');
 vm.runInContext(backendSource + '\nthis.selectBlurBackend = selectBlurBackend;', sandbox);
 // Numeric appearance contract, including the user's 24 / 67 example.
-const peerBackend = path.join(__dirname, '../../gnome-shell-soft/blurBackend.js');
+const peerBackend = path.join(__dirname, '../../gnome-extended/blurBackend.js');
 if (fs.existsSync(peerBackend))
     assert.equal(fs.readFileSync(peerBackend, 'utf8'),
         fs.readFileSync(path.join(__dirname, '../blurBackend.js'), 'utf8'));

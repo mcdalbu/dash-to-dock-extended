@@ -1,3 +1,5 @@
+import {Config} from './dependencies/shell/misc.js';
+
 import {
     Clutter,
     GLib,
@@ -820,3 +822,11 @@ export function addActor(element, actor) {
 
 export const clamp = (v, m, M) => Math.min(Math.max(v, m), M);
 export const clampDouble = v => clamp(v, 0, 1);
+
+/** Translate menu animation options for GNOME Shell 51 and older releases. */
+export function popupMenuOptions(animate = true) {
+    if (Number.parseInt(Config.PACKAGE_VERSION, 10) >= 51)
+        return {animate};
+    // BoxPointer.PopupAnimation: NONE = 0, FULL = 3.
+    return animate ? 3 : 0;
+}

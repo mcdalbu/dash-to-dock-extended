@@ -1,4 +1,4 @@
-# Dash to Dock Soft
+# Dash to Dock Extended
 
 Fork independente do [Dash to Dock](https://github.com/micheleg/dash-to-dock),
 de Michele G. e colaboradores, mantido por [mcdalbu](https://github.com/mcdalbu).
@@ -7,7 +7,7 @@ Base: commit `2dfae34` (versão upstream 110).
 
 Versão estável: **25**.
 
-Instalação: `gnome-extensions install --force dash-to-dock-soft@local_v25.zip`.
+Instalação: `gnome-extensions install --force dash-to-dock-extended@local_v25.zip`.
 Encerre a sessão e entre novamente após atualizar.
 
 ## Novas opções
@@ -74,17 +74,17 @@ efeitos sobrepostos.
 
 ## Identidade do fork
 
-- Nome: **Dash to Dock Soft**
-- UUID: `dash-to-dock-soft@local`
-- Schema: `org.gnome.shell.extensions.dash-to-dock-soft`
-- Configurações: `/org/gnome/shell/extensions/dash-to-dock-soft/`
+- Nome: **Dash to Dock Extended**
+- UUID: `dash-to-dock-extended@local`
+- Schema: `org.gnome.shell.extensions.dash-to-dock-extended`
+- Configurações: `/org/gnome/shell/extensions/dash-to-dock-soft/` (preservado para manter preferências)
 - Versão do fork: **15**
 - Versões declaradas do GNOME Shell: **45–51**, herdadas do upstream.
 
 O UUID e o schema próprios preservam a instalação e as configurações originais.
 Desative o Dash to Dock original antes de ativar este fork, pois ambos controlam
 o mesmo dash. O repositório deste fork é
-[mcdalbu/dash-to-dock-soft](https://github.com/mcdalbu/dash-to-dock-soft).
+[mcdalbu/dash-to-dock-extended](https://github.com/mcdalbu/dash-to-dock-extended).
 O remoto `upstream` aponta para o projeto original.
 
 ## Instalar o ZIP
@@ -92,7 +92,7 @@ O remoto `upstream` aponta para o projeto original.
 Na pasta que contém o ZIP:
 
 ```bash
-gnome-extensions install dash-to-dock-soft@local_v24.zip
+gnome-extensions install dash-to-dock-extended@local_v24.zip
 ```
 
 Encerre a sessão e entre novamente para que o GNOME Shell reconheça a nova extensão.
@@ -100,8 +100,8 @@ Depois:
 
 ```bash
 gnome-extensions disable dash-to-dock@micxgx.gmail.com
-gnome-extensions enable dash-to-dock-soft@local
-gnome-extensions prefs dash-to-dock-soft@local
+gnome-extensions enable dash-to-dock-extended@local
+gnome-extensions prefs dash-to-dock-extended@local
 ```
 
 Se a versão original não estiver instalada, ignore o comando para desativá-la.
@@ -409,7 +409,7 @@ não da área de trabalho do usuário.
 ## Créditos e licença
 
 Este fork é mantido por **[mcdalbu](https://github.com/mcdalbu)**, responsável
-pelo projeto Dash to Dock Soft e suas opções de aparência.
+pelo projeto Dash to Dock Extended e suas opções de aparência.
 
 Dash to Dock foi criado por Michele G. (`micxgx@gmail.com`) e colaboradores.
 O código e os créditos originais foram preservados. A licença continua sendo
@@ -428,7 +428,7 @@ corresponde a alfa 0,67 e transparência 33%, preservando textos e ícones.
 Os modos de transparência padrão e dinâmico mantêm seus comportamentos próprios.
 
 O novo controle **Blur brightness (%)** ajusta o brilho do desfoque de 10 a 100%,
-na mesma escala do Gnome Shell Soft; o padrão permanece em 85%.
+na mesma escala do Gnome Extended; o padrão permanece em 85%.
 Configurações das duas extensões continuam independentes. Para comparar o
 resultado, use os mesmos raio, brilho e opacidade, além da mesma cor de fundo.
 O conteúdo amostrado e as dimensões das superfícies podem produzir diferenças
@@ -464,7 +464,7 @@ controlados separadamente pela opção de estilo dos menus.
 
 Validação dedicada em uma sessão isolada do GNOME Shell 50:
 `SOFT_TEST_CONTEXT_COLORS=1 python3 tests/shell-menu-headless.py`.
-Pacote: `dash-to-dock-soft@local_v25-beta.2.zip`.
+Pacote: `dash-to-dock-extended@local_v25-beta.2.zip`.
 
 
 ## Beta 25-beta.3: destaque dos ícones

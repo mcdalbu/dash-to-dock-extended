@@ -225,7 +225,7 @@ export class ThemeManager {
         const node = menu.get_theme_node();
         const scale = St.ThemeContext.get_for_stage(global.stage).scale_factor;
         // Dock opacity is independent of the menu opacity. In particular,
-        // ignore Gnome Shell Soft briefly restoring its original menu fill.
+        // ignore Gnome Extended briefly restoring its original menu fill.
         const surface = settings.shellMenuStyle ? shellMenuSurfaceStyle(
             node, scale, settings.shellMenuKeepDockRadius,
             settings.dockShadowIntensity, settings.dockShadowSize) : '';
@@ -839,7 +839,7 @@ export class ThemeManager {
             return;
 
         if (!this._shadowFile) {
-            const [file, stream] = Gio.File.new_tmp('dash-to-dock-soft-shadow-XXXXXX');
+            const [file, stream] = Gio.File.new_tmp('dash-to-dock-extended-shadow-XXXXXX');
             stream.close(null);
             this._shadowFile = file;
         } else {

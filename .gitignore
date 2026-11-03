@@ -8,9 +8,13 @@ stylesheet.css
 Settings.ui.h
 _build
 
-dash-to-dock-soft@local*.zip
-/dash-to-dock-soft@local_v*/
+dash-to-dock-extended@local*.zip
+/dash-to-dock-extended@local_v*/
 
 validation/*.log
 __pycache__/
 *.pyc
+
+dash-to-dock-soft@local*.zip
+
+/dash-to-dock-soft@local_v*/

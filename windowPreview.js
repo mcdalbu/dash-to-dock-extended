@@ -14,7 +14,6 @@ import {
 } from './dependencies/gi.js';
 
 import {
-    BoxPointer,
     Main,
     PopupMenu,
     Workspace,
@@ -77,7 +76,7 @@ export class WindowPreviewMenu extends PopupMenu.PopupMenu {
         const windows = this._source.getInterestingWindows();
         if (windows.length > 0) {
             this._redisplay();
-            this.open(BoxPointer.PopupAnimation.FULL);
+            this.open(Utils.popupMenuOptions());
             this.actor.navigate_focus(null, St.DirectionType.TAB_FORWARD, false);
             this._source.emit('sync-tooltip');
         }
@@ -276,7 +275,7 @@ class WindowPreviewList extends PopupMenu.PopupMenuSection {
             addedItems[i].item.show(animate);
 
         if (newWin.length < 1)
-            this._getTopMenu().close(~0);
+            this._getTopMenu().close(Utils.popupMenuOptions());
 
         // As for upstream:
         // St.ScrollView always requests space horizontally for a possible vertical

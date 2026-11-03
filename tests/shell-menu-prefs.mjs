@@ -111,7 +111,7 @@ if (captureDir) {
     settings.reset('dock-outline');
     const notebook = controls.get('settings_notebook');
     const loop = GLib.MainLoop.new(null, false);
-    window.title = 'Dash to Dock Soft';
+    window.title = 'Dash to Dock Extended';
     window.set_default_size(860, 850);
     window.present();
     let current = '';

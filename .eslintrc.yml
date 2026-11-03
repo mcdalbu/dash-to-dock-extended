@@ -1,5 +1,6 @@
 ignorePatterns:
   - _build/**
+  - dash-to-dock-extended@local_v*/**
   - dash-to-dock-soft@local_v*/**
 
 extends:

@@ -1,11 +1,11 @@
 # Basic Makefile
 
-UUID = dash-to-dock-soft@local
+UUID = dash-to-dock-extended@local
 BASE_MODULES = extension.js \
                metadata.json \
                COPYING \
                README.md \
-               README-Dash-to-Dock-Soft.md \
+               README-Dash-to-Dock-Extended.md \
                AUTHORS.md \
                $(NULL)
 
@@ -52,7 +52,7 @@ else
 	SHARE_PREFIX = $(DESTDIR)/usr/share
 	INSTALLBASE = $(SHARE_PREFIX)/gnome-shell/extensions
 endif
-INSTALLNAME = dash-to-dock-soft@local
+INSTALLNAME = dash-to-dock-extended@local
 
 # The command line passed variable VERSION is used to set the version string
 # in the metadata and in the generated zip-file. If no VERSION is passed, the
@@ -74,7 +74,7 @@ clean:
 
 extension: ./schemas/gschemas.compiled ./stylesheet.css $(MSGSRC:.po=.mo)
 
-./schemas/gschemas.compiled: ./schemas/org.gnome.shell.extensions.dash-to-dock-soft.gschema.xml
+./schemas/gschemas.compiled: ./schemas/org.gnome.shell.extensions.dash-to-dock-extended.gschema.xml
 	glib-compile-schemas ./schemas/
 
 potfile: ./po/dashtodock.pot

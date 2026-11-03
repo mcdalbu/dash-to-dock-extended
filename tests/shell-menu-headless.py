@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """Integration test in a private D-Bus/Wayland session; never changes the desktop.
 
-Run with /usr/bin/python3 tests/shell-menu-headless.py. Requires GNOME Shell 50, PyGObject
+Run with /usr/bin/python3 tests/shell-menu-headless.py. Requires GNOME Shell 50 or 51, PyGObject
 and a usable renderer. The temporary helper enables Eval only on the test bus.
 """
 import json
@@ -14,7 +14,7 @@ import tempfile
 import time
 
 ROOT = Path(__file__).resolve().parents[1]
-UUID = 'dash-to-dock-soft@local'
+UUID = 'dash-to-dock-extended@local'
 
 
 def stage():
@@ -22,24 +22,24 @@ def stage():
         base = Path(temporary)
         extension = base / 'data/gnome-shell/extensions' / UUID
         shutil.copytree(ROOT, extension, ignore=shutil.ignore_patterns(
-            '*.zip', 'validation', 'tests', '.git', '_build', 'dash-to-dock-soft@local_v*'))
+            '*.zip', 'validation', 'tests', '.git', '_build', 'dash-to-dock-extended@local_v*'))
         locale = extension / 'locale/pt_BR/LC_MESSAGES'
         locale.mkdir(parents=True, exist_ok=True)
         shutil.copy2(ROOT / 'po/pt_BR.mo', locale / 'dashtodock.mo')
         if os.environ.get('SOFT_TEST_WITH_SHELL_SOFT'):
-            shutil.copytree(ROOT.parent / 'gnome-shell-soft', extension.parent / 'gnome-shell-soft@local',
+            shutil.copytree(ROOT.parent / 'gnome-extended', extension.parent / 'gnome-extended@local',
                             ignore=shutil.ignore_patterns('*.zip', '.git', 'validation', 'tests', '*@local_v*'))
         if os.environ.get('SOFT_TEST_NATIVE'):
             backend = extension / 'blurBackend.js'
             backend.write_text(backend.read_text().replace('gi://Blur', 'gi://SoftTestMissingBlur'))
             if os.environ.get('SOFT_TEST_WITH_SHELL_SOFT'):
-                backend = extension.parent / 'gnome-shell-soft@local/blurBackend.js'
+                backend = extension.parent / 'gnome-extended@local/blurBackend.js'
                 backend.write_text(backend.read_text().replace('gi://Blur', 'gi://SoftTestMissingBlur'))
         helper = extension.parent / 'soft-test-helper@local'
         helper.mkdir()
         (helper / 'metadata.json').write_text(json.dumps({
             'uuid': helper.name, 'name': 'Isolated test helper',
-            'description': 'Private test session only', 'shell-version': ['50'],
+            'description': 'Private test session only', 'shell-version': ['50', '51'],
         }))
         (helper / 'extension.js').write_text('''
 import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
@@ -78,7 +78,7 @@ def test():
     shell_settings = Gio.Settings.new('org.gnome.shell')
     enabled = ['soft-test-helper@local']
     if os.environ.get('SOFT_TEST_WITH_SHELL_SOFT'):
-        enabled.append('gnome-shell-soft@local')
+        enabled.append('gnome-extended@local')
     shell_settings.set_strv('enabled-extensions', enabled + [UUID])
     shell_settings.set_boolean('disable-user-extensions', False)
     shell_settings.set_string('welcome-dialog-last-shown-version', '999')
@@ -153,7 +153,7 @@ def test():
             if shell.poll() is not None:
                 raise RuntimeError('Headless Shell exited; see validation/gnome50-session.log')
             try:
-                if evaluate('Main.extensionManager.lookup("dash-to-dock-soft@local")?.state === 1'):
+                if evaluate('Main.extensionManager.lookup("dash-to-dock-extended@local")?.state === 1'):
                     break
             except Exception:
                 pass
@@ -161,7 +161,7 @@ def test():
         else:
             raise RuntimeError('Extension did not enable; see validation/gnome50-session.log')
 
-        evaluate('(async()=>{globalThis.extension = Main.extensionManager.lookup("dash-to-dock-soft@local").stateObj; '
+        evaluate('(async()=>{globalThis.extension = Main.extensionManager.lookup("dash-to-dock-extended@local").stateObj; '
                  'globalThis.dockModule = await import(extension.dir.get_child("docking.js").get_uri()); '
                  'globalThis.PM = await import("resource:///org/gnome/shell/ui/popupMenu.js"); globalThis.manager = dockModule.DockManager; Main.overview.hide();})()')
         time.sleep(1)
@@ -232,8 +232,8 @@ def test():
             results['passed'] = True
             print(json.dumps(results, indent=2))
             return
-        check('own-identity', 'extension.uuid === "dash-to-dock-soft@local" && '
-              'manager.settings.settings_schema.get_id() === "org.gnome.shell.extensions.dash-to-dock-soft"')
+        check('own-identity', 'extension.uuid === "dash-to-dock-extended@local" && '
+              'manager.settings.settings_schema.get_id() === "org.gnome.shell.extensions.dash-to-dock-extended"')
         check('profile-default', 'manager.settings.shellMenuStyle && manager.settings.dockBlur && '
               'manager.settings.backgroundOpacity === 0.55 && manager.settings.dockShadowIntensity === 100')
         evaluate('manager.settings.set_boolean("dock-fixed", true); '
@@ -313,7 +313,7 @@ def test():
             print(json.dumps(results, indent=2))
             return
         if os.environ.get('SOFT_TEST_WITH_SHELL_SOFT'):
-            evaluate('globalThis.soft = Main.extensionManager.lookup("gnome-shell-soft@local").stateObj; '
+            evaluate('globalThis.soft = Main.extensionManager.lookup("gnome-extended@local").stateObj; '
                      'globalThis.dock = manager.allDocks[0]; globalThis.background = dock.dash._background; '
                      'manager.settings.set_enum("transparency-mode",1); '
                      'manager.settings.set_int("dock-blur-radius",24); '

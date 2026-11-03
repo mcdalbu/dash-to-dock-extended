@@ -1,19 +1,19 @@
-# Dash to Dock Soft
+# Dash to Dock Extended
 
 Fork independente baseado no [Dash to Dock](https://github.com/micheleg/dash-to-dock)
 v110. O dock usa o mesmo contorno, os mesmos cantos e a mesma sombra externa dos
 menus de notificações/calendário e Quick Settings do GNOME Shell.
 
-- **Nome:** Dash to Dock Soft
-- **UUID:** `dash-to-dock-soft@local`
-- **Schema:** `org.gnome.shell.extensions.dash-to-dock-soft`
-- **Versão deste fork:** 21
-- **Repositório:** [mcdalbu/dash-to-dock-soft](https://github.com/mcdalbu/dash-to-dock-soft)
+- **Nome:** Dash to Dock Extended
+- **UUID:** `dash-to-dock-extended@local`
+- **Schema:** `org.gnome.shell.extensions.dash-to-dock-extended`
+- **Versão deste fork:** 26
+- **Repositório:** [mcdalbu/dash-to-dock-extended](https://github.com/mcdalbu/dash-to-dock-extended)
 
-Esta versão atualiza o Dash to Dock Soft principal e mantém seu UUID, schema
-e caminho de configurações: os valores já salvos continuam disponíveis.
+Esta versão adota o nome Dash to Dock Extended e um novo UUID e schema.
+O caminho dconf foi preservado: os valores já salvos continuam disponíveis.
 Mantenha apenas uma extensão de dock ativada por vez.
-A extensão **Gnome Shell Soft** pode continuar ativa para os menus.
+A extensão **Gnome Extended** pode continuar ativa para os menus.
 
 ## Visual dos menus do Shell
 
@@ -28,7 +28,7 @@ do relógio como alternativa), incluindo:
 A cor do fundo tem um controle independente, descrito abaixo.
 
 Acompanha mudanças entre tema claro e escuro e estilos aplicados ao menu por
-**Gnome Shell Soft**. Não aplica transparência aos ícones nem os desfoca.
+**Gnome Extended**. Não aplica transparência aos ícones nem os desfoca.
 A versão 20 restaura as margens originais do Dash to Dock, também com o visual
 dos menus ativado. A margem fixa de 12 pixels usada para a sombra foi removida.
 Sombras que ultrapassam a borda do monitor são recortadas pela tela.
@@ -91,7 +91,7 @@ Abrir e fechar o Quick Settings não reaplica o tema do dock quando as cores,
 o contorno, os cantos e a sombra do menu continuam iguais. Eventos de estilo são
 agrupados e comparados depois de o estilo final estar disponível. A opacidade do
 menu é independente da opacidade do dock. Isso evita reiniciar a transição de
-transparência ao abrir o menu, inclusive com Gnome Shell Soft ativo.
+transparência ao abrir o menu, inclusive com Gnome Extended ativo.
 
 As páginas de preferências usam margens e espaçamento consistentes, rótulos à
 esquerda, controles alinhados e colunas compartilhadas por página. Foram corrigidos
@@ -100,7 +100,7 @@ As opções novas de altura e sombra seguem o mesmo layout das outras escalas.
 
 ## Blur e transparência
 
-O blur dinâmico herdado do Dash to Dock Soft vem **ativado**, com intensidade
+O blur dinâmico herdado do Dash to Dock Extended vem **ativado**, com intensidade
 **30**, opacidade fixa do fundo em **55%** e brilho de **85%**. Usa uma camada
 separada com `BlurEffect` em modo `BACKGROUND`, preservando os ícones nítidos.
 A transparência dinâmica e os demais ajustes herdados continuam disponíveis.
@@ -126,15 +126,15 @@ retos, enquanto a superfície continua arredondada. A biblioteca é opcional e n
 ## Instalar
 
 ```bash
-gnome-extensions install --force dash-to-dock-soft@local_v21.zip
+gnome-extensions install --force dash-to-dock-extended@local_v26.zip
 ```
 
 Encerre a sessão e entre novamente para carregar a atualização. Depois:
 
 ```bash
 # Se usar o original, desative também dash-to-dock@micxgx.gmail.com.
-gnome-extensions enable dash-to-dock-soft@local
-gnome-extensions prefs dash-to-dock-soft@local
+gnome-extensions enable dash-to-dock-extended@local
+gnome-extensions prefs dash-to-dock-extended@local
 ```
 
 Ignore a desativação de uma extensão que não estiver instalada. Para atualizar
@@ -175,7 +175,7 @@ repetidas do Quick Settings e verificam o alinhamento das preferências em janel
 A versão 17 acrescenta comparação de pixels da sombra fora do dock a meio caminho
 da animação nos quatro lados, ausência de sombra ao ocultar e acompanhamento
 do recorte em cada frame de uma animação real de autohide.
-Para testar em conjunto com Gnome Shell Soft:
+Para testar em conjunto com Gnome Extended:
 
 ```bash
 SOFT_TEST_WITH_SHELL_SOFT=1 /usr/bin/python3 tests/shell-menu-headless.py
@@ -188,7 +188,15 @@ verificação nas respectivas sessões. O teste não comprova esses cenários.
 ## Créditos
 
 Mantém o histórico, as funcionalidades e a licença GPL-2.0-or-later do
-Dash to Dock e do Dash to Dock Soft. Veja `COPYING`, `AUTHORS.md` e o
-[README da versão 15](README-Dash-to-Dock-Soft.md).
-Os módulos de blur e recuperação são herdados do Dash to Dock Soft.
+Dash to Dock e do Dash to Dock Extended. Veja `COPYING`, `AUTHORS.md` e o
+[README da versão 15](README-Dash-to-Dock-Extended.md).
+Os módulos de blur e recuperação são herdados do Dash to Dock Extended.
 O novo módulo `shellMenuStyle.js` adapta as propriedades reais do tema dos menus.
+
+## GNOME Shell 51
+
+Esta versão inclui GNOME Shell 51 nos metadados. O teste integrado de menus, aparência, autohide, recuperação e preferências passou em uma sessão isolada do GNOME Shell 51.1, com Gnome Extended e Dash to Dock Extended ativos em conjunto.
+
+## Renomeação
+
+A extensão usa o novo nome e UUID. O caminho de armazenamento dconf foi preservado para manter as preferências existentes. Ao instalar o novo UUID, desative a extensão de nome antigo antes de ativar a nova.
