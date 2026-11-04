@@ -1,5 +1,16 @@
-# Validação da versão 28
+# Validação da versão 29
 
+Destaques da versão 29 (4 de novembro de 2026): `make check` e
+`SOFT_TEST_LABEL=highlight-opacity python3 tests/shell-menu-headless.py`: PASS.
+Na sessão isolada do GNOME Shell, as cores computadas do hover correspondem
+ao menu nos temas claro/escuro, incluindo ícones ativos e Mostrar aplicativos.
+O fundo persistente do aplicativo em foco usa a mesma cor com seu alfa
+multiplicado pela opacidade configurada (0%, 35% e 100% verificados).
+Com as cores do Shell desabilitadas, a cor original do destaque continua
+acompanhando a opacidade. Preferências e ativação/desativação do perfil: PASS.
+Resultado: `validation/shell-menu-highlight-opacity-results.json`.
+
+Validação de base da versão 28 (mantida como histórico):
 GNOME Shell 51.1, sessões D-Bus/Wayland isoladas, 4 de novembro de 2026.
 
 - make check: PASS, incluindo ESLint 9, layout do GtkBuilder e testes de

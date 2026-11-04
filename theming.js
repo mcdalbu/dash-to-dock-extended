@@ -376,23 +376,24 @@ export class ThemeManager {
     _updateHoverStyle() {
         const {settings} = Docking.DockManager;
         const menuHover = settings.shellMenuColors && this._colorHover?.actor;
-        if (!menuHover) {
-            this._disableHoverStyle();
-            return;
-        }
 
         // A scoped stylesheet also covers icons created/replaced after startup,
-        // without overwriting their inline styles. Keep menu hover colors and
-        // their cleanup in one stylesheet.
+        // without overwriting their inline styles. The persistent focus fill
+        // follows the opacity slider; hovering retains the theme's full feedback.
         this._hoverClass ??= `shell-menu-hover-profile-${++hoverStyleId}`;
-        let css = '';
+        // Match $remark_color in _stylesheet.scss when Shell colors are disabled.
+        const color = menuHover ? menuHover.get_theme_node().get_background_color()
+            : {red: 238, green: 238, blue: 238, alpha: 51};
+        const scope = `#dashtodockContainer.${this._hoverClass} #dash .dash-item-container`;
+        const alpha = color.alpha / 255 * opacityFraction(settings.backgroundOpacity, 1);
+        let css = `${scope} .app-well-app.focused .overview-icon,` +
+            `${scope} .overview-tile.focused .overview-icon {` +
+            `background-image: none; background-color: rgba(${color.red}, ${color.green}, ${color.blue}, ${alpha}) !important;}`;
         if (menuHover) {
-            const color = menuHover.get_theme_node().get_background_color();
-            const scope = `#dashtodockContainer.${this._hoverClass} #dash .dash-item-container`;
             css += `${scope} .app-well-app:hover .overview-icon,` +
                 `${scope} .overview-tile:hover .overview-icon,` +
                 `${scope} .show-apps:hover .overview-icon {` +
-                `background-color: rgba(${color.red}, ${color.green}, ${color.blue}, ${color.alpha / 255}) !important;}`;
+                `background-image: none; background-color: rgba(${color.red}, ${color.green}, ${color.blue}, ${color.alpha / 255}) !important;}`;
         }
         const theme = St.ThemeContext.get_for_stage(global.stage).get_theme();
         if (this._hoverTheme === theme && this._hoverCss === css)

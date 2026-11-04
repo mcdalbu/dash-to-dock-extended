@@ -1,4 +1,4 @@
-> Versão estável [28](RELEASE_NOTES.md), com visual dos menus do Shell. A sombra externa é opcional no visual dos menus do Shell. Blur e sombra dos ícones são fornecidos pelo GNOME Extended.
+> Versão estável [29](RELEASE_NOTES.md), com visual dos menus do Shell. A sombra externa é opcional no visual dos menus do Shell. Blur e sombra dos ícones são fornecidos pelo GNOME Extended.
 
 # Dash to Dock Extended
 
@@ -9,7 +9,7 @@ menus de notificações/calendário e Quick Settings do GNOME Shell.
 - **Nome:** Dash to Dock Extended
 - **UUID:** `dash-to-dock-extended@local`
 - **Schema:** `org.gnome.shell.extensions.dash-to-dock-extended`
-- **Versão deste fork:** 26
+- **Versão deste fork:** 29
 - **Repositório:** [mcdalbu/dash-to-dock-extended](https://github.com/mcdalbu/dash-to-dock-extended)
 
 Esta versão adota o nome Dash to Dock Extended e um novo UUID e schema.

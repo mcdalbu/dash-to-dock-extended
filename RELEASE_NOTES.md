@@ -1,3 +1,15 @@
+# Dash to Dock Extended 29 — 4 de novembro de 2026
+
+- O destaque persistente do aplicativo ativo usa a cor do menu do tema quando
+  as cores do GNOME Shell estão habilitadas.
+- A transparência desse destaque acompanha a barra de opacidade, inclusive
+  com as cores do Shell desabilitadas. O alfa original é multiplicado pela
+  opacidade configurada; em 0%, o fundo persistente fica transparente.
+- O hover mantém a intensidade original do tema, inclusive sobre o aplicativo
+  ativo e o botão Mostrar aplicativos.
+- Testes no GNOME Shell 51.1: temas claro e escuro, opacidades 0%, 35% e 100%,
+  preferências e ativação/desativação do perfil. `make check`: PASS.
+
 # Dash to Dock Extended 28 — 4 de novembro de 2026
 
 Versão estável publicada na branch principal fork/soft-icons.
