@@ -222,23 +222,13 @@ const DockSettings = GObject.registerClass({
         const appearance = this._builder.get_object('listbox1');
         const rowFor = id => this._builder.get_object(id).get_ancestor(Gtk.ListBoxRow);
         const appearanceOrder = ['shell_menu_style_switch', 'shell_menu_colors_switch',
-            'shell_menu_keep_dock_radius_switch',
-            'dock_shadow_intensity_scale', 'dock_shadow_size_scale',
-            'dock_blur_switch', 'dock_blur_radius_scale', 'dock_blur_brightness_scale',
-            'dock_blur_corner_radius_scale', 'dock_outline_switch', 'dock_outline_intensity_scale',
-            'icon_shadow_switch', 'icon_shadow_intensity_scale', 'icon_shadow_offset_x_scale',
-            'icon_shadow_offset_y_scale', 'icon_shadow_blur_scale'];
+            'shell_menu_keep_dock_radius_switch'];
         for (const [index, id] of appearanceOrder.entries()) {
             const row = rowFor(id);
             appearance.remove(row);
             appearance.insert(row, index);
         }
-        const sections = new Map([
-            [rowFor('shell_menu_style_switch'), __('Shell menu appearance')],
-            [rowFor('dock_blur_switch'), __('Background blur')],
-            [rowFor('dock_outline_switch'), __('Manual outline')],
-            [rowFor('icon_shadow_switch'), __('Icon shadows')],
-        ]);
+        const sections = new Map([[rowFor('shell_menu_style_switch'), __('Shell menu appearance')]]);
         appearance.set_header_func((row, previous) => {
             const title = sections.get(row);
             row.set_header(title ? new Gtk.Label({
@@ -1046,49 +1036,6 @@ const DockSettings = GObject.registerClass({
 
         // Appearance Panel
 
-        this._settings.bind('icon-shadow',
-            this._builder.get_object('icon_shadow_switch'),
-            'active',
-            Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind('icon-shadow-intensity',
-            this._builder.get_object('icon_shadow_intensity_adjustment'),
-            'value',
-            Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind('icon-shadow',
-            this._builder.get_object('icon_shadow_intensity_scale'),
-            'sensitive',
-            Gio.SettingsBindFlags.GET);
-        this._settings.bind('icon-shadow-offset-x',
-            this._builder.get_object('icon_shadow_offset_x_adjustment'),
-            'value',
-            Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind('icon-shadow',
-            this._builder.get_object('icon_shadow_offset_x_scale'),
-            'sensitive',
-            Gio.SettingsBindFlags.GET);
-
-        this._settings.bind('icon-shadow-offset-y',
-            this._builder.get_object('icon_shadow_offset_y_adjustment'),
-            'value',
-            Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind('icon-shadow',
-            this._builder.get_object('icon_shadow_offset_y_scale'),
-            'sensitive',
-            Gio.SettingsBindFlags.GET);
-
-        this._settings.bind('icon-shadow-blur',
-            this._builder.get_object('icon_shadow_blur_adjustment'),
-            'value',
-            Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind('icon-shadow',
-            this._builder.get_object('icon_shadow_blur_scale'),
-            'sensitive',
-            Gio.SettingsBindFlags.GET);
-
-        this._settings.bind('dock-outline',
-            this._builder.get_object('dock_outline_switch'),
-            'active',
-            Gio.SettingsBindFlags.DEFAULT);
         this._settings.bind('shell-menu-style',
             this._builder.get_object('shell_menu_style_switch'),
             'active',
@@ -1109,73 +1056,47 @@ const DockSettings = GObject.registerClass({
             this._builder.get_object('shell_menu_keep_dock_radius_switch'),
             'sensitive',
             Gio.SettingsBindFlags.GET);
-        this._settings.bind('dock-shadow-intensity',
-            this._builder.get_object('dock_shadow_intensity_adjustment'),
-            'value',
-            Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind('shell-menu-style',
-            this._builder.get_object('dock_shadow_intensity_scale'),
-            'sensitive',
-            Gio.SettingsBindFlags.GET);
-        this._settings.bind('dock-shadow-size',
-            this._builder.get_object('dock_shadow_size_adjustment'),
-            'value',
-            Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind('shell-menu-style',
-            this._builder.get_object('dock_shadow_size_scale'),
-            'sensitive',
-            Gio.SettingsBindFlags.GET);
-        this._settings.bind('dock-outline-intensity',
-            this._builder.get_object('dock_outline_intensity_adjustment'),
-            'value',
-            Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind('dock-outline',
-            this._builder.get_object('dock_outline_intensity_scale'),
-            'sensitive',
-            Gio.SettingsBindFlags.GET);
-
-        this._settings.bind('dock-blur',
-            this._builder.get_object('dock_blur_switch'),
-            'active',
-            Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind('dock-blur-radius',
-            this._builder.get_object('dock_blur_radius_adjustment'),
-            'value',
-            Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind('dock-blur',
-            this._builder.get_object('dock_blur_radius_scale'),
-            'sensitive',
-            Gio.SettingsBindFlags.GET);
-
-        this._settings.bind('dock-blur-brightness',
-            this._builder.get_object('dock_blur_brightness_adjustment'),
-            'value',
-            Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind('dock-blur',
-            this._builder.get_object('dock_blur_brightness_scale'),
-            'sensitive',
-            Gio.SettingsBindFlags.GET);
-
-        this._settings.bind('dock-blur-corner-radius',
-            this._builder.get_object('dock_blur_corner_radius_adjustment'),
-            'value',
-            Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind('dock-blur',
-            this._builder.get_object('dock_blur_corner_radius_scale'),
-            'sensitive',
-            Gio.SettingsBindFlags.GET);
-
-        const syncSurfaceControls = () => {
-            const followsShell = this._settings.get_boolean('shell-menu-style');
-            this._builder.get_object('dock_outline_switch').sensitive = !followsShell;
-            this._builder.get_object('dock_outline_intensity_scale').sensitive =
-                !followsShell && this._settings.get_boolean('dock-outline');
-            this._builder.get_object('dock_blur_corner_radius_scale').sensitive =
-                !followsShell && this._settings.get_boolean('dock-blur');
+        const menuShadow = new Adw.SwitchRow({
+            name: 'setting-shell-menu-shadow', title: 'Sombra ao redor do dock',
+            subtitle: 'Usa a sombra do tema dos menus do Shell.',
+        });
+        this._settings.bind('shell-menu-shadow', menuShadow, 'active', Gio.SettingsBindFlags.DEFAULT);
+        const list = this._builder.get_object('listbox1');
+        list.insert(menuShadow, 3);
+        const shadowRows = [];
+        for (const [key, title] of [
+            ['dock-shadow-intensity', 'Intensidade da sombra (%)'],
+            ['dock-shadow-size', 'Tamanho da sombra (%)'],
+        ]) {
+            const row = new Adw.SpinRow({
+                name: `setting-${key}`, title, subtitle: '100% mantém o valor do tema.', digits: 0,
+                adjustment: new Gtk.Adjustment({lower: 0, upper: 200, step_increment: 5, page_increment: 10}),
+            });
+            this._settings.bind(key, row, 'value', Gio.SettingsBindFlags.DEFAULT);
+            list.insert(row, 4 + shadowRows.length);
+            shadowRows.push(row);
+        }
+        const syncShadowControls = () => {
+            menuShadow.sensitive = this._settings.get_boolean('shell-menu-style');
+            for (const row of shadowRows)
+                row.sensitive = menuShadow.sensitive && this._settings.get_boolean('shell-menu-shadow');
         };
-        this._surfaceSignals = ['shell-menu-style', 'dock-outline', 'dock-blur'].map(key =>
-            this._settings.connect(`changed::${key}`, syncSurfaceControls));
-        syncSurfaceControls();
+        this._surfaceSignals = ['shell-menu-style', 'shell-menu-shadow'].map(key =>
+            this._settings.connect(`changed::${key}`, syncShadowControls));
+        syncShadowControls();
+        const appearanceInfo = new Adw.ActionRow({
+            title: 'Efeitos do GNOME Extended',
+            subtitle: 'Configure no GNOME Extended: aparência compartilhada com a grade e outros docks.',
+        });
+        const openAppearance = new Gtk.Button({
+            label: 'Abrir GNOME Extended', valign: Gtk.Align.CENTER,
+        });
+        openAppearance.connect('clicked', () => {
+            Gio.Subprocess.new(
+                ['gnome-extensions', 'prefs', 'gnome-extended@local'], Gio.SubprocessFlags.NONE);
+        });
+        appearanceInfo.add_suffix(openAppearance);
+        this._builder.get_object('listbox1').prepend(appearanceInfo);
 
         this._settings.bind('apply-custom-theme',
             this._builder.get_object('customize_theme'),

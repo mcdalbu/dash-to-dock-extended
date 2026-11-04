@@ -5,6 +5,7 @@ name: Make
   push:
     branches:
       - master
+      - fork/soft-icons
       - ubuntu-dock
       - make_ci
     tags:

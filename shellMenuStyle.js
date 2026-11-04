@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-// ThemeNode lengths and StShadow fields are already in physical pixels.
+// ThemeNode lengths are already in physical pixels.
 // Inline St CSS is in logical pixels, so divide once before serializing.
 function colorCss(color, intensity = 1) {
     return `rgba(${color.red}, ${color.green}, ${color.blue}, ${Math.min(1, color.alpha / 255 * intensity)})`;
 }
 
 export function shellMenuSurfaceStyle(node, scale, keepDockRadius = false,
-    shadowIntensity = 100, shadowSize = 100) {
+    shadowEnabled = true, shadowIntensity = 100, shadowSize = 100) {
     const sides = ['top', 'right', 'bottom', 'left'];
     let style = sides.map((side, i) =>
         `border-${side}: ${node.get_border_width(i) / scale}px solid ${colorCss(node.get_border_color(i))};`)
@@ -15,12 +15,12 @@ export function shellMenuSurfaceStyle(node, scale, keepDockRadius = false,
         const radii = sides.map((_side, i) => `${node.get_border_radius(i) / scale}px`);
         style += `border-radius: ${radii.join(' ')};`;
     }
-    const shadow = node.get_box_shadow();
-    if (shadow && shadowSize > 0) {
+    const shadow = shadowEnabled ? node.get_box_shadow() : null;
+    if (shadow && shadowSize > 0 && shadowIntensity > 0) {
         const lengths = [shadow.xoffset, shadow.yoffset, shadow.blur, shadow.spread]
             .map(value => `${value / scale * shadowSize / 100}px`).join(' ');
-        const color = colorCss(shadow.color, shadowIntensity / 100);
-        style += `box-shadow: ${shadow.inset ? 'inset ' : ''}${lengths} ${color};`;
+        style += `box-shadow: ${shadow.inset ? 'inset ' : ''}${lengths} ` +
+            `${colorCss(shadow.color, shadowIntensity / 100)};`;
     } else {
         style += 'box-shadow: none;';
     }

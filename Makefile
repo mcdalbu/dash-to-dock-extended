@@ -5,6 +5,8 @@ BASE_MODULES = extension.js \
                metadata.json \
                COPYING \
                README.md \
+               RELEASE_NOTES.md \
+               VALIDATION.md \
                README-Dash-to-Dock-Extended.md \
                AUTHORS.md \
                $(NULL)
@@ -28,8 +30,6 @@ EXTRA_MODULES = \
                 prefs.js \
                 theming.js \
                 shellMenuStyle.js \
-                blurBackend.js \
-                blurRedrawGuard.js \
                 dockRedrawRecovery.js \
                 utils.js \
                 dbusmenuUtils.js \
@@ -156,5 +156,8 @@ ifneq ($(strip $(ESLINT_TAP)),)
 endif
 
 check:
+	node tests/dock-effects.cjs
+	node tests/autohide-position.cjs
+	node tests/dock-redraw-recovery.cjs
 	python3 tests/preferences-layout.py
 	ESLINT_USE_FLAT_CONFIG=false $(ESLINT) $(ESLINT_ARGS) .

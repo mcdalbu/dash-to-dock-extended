@@ -1,3 +1,5 @@
+> Versão estável [28](RELEASE_NOTES.md), com visual dos menus do Shell. A sombra externa é opcional no visual dos menus do Shell. Blur e sombra dos ícones são fornecidos pelo GNOME Extended.
+
 # Dash to Dock Extended
 
 Fork independente baseado no [Dash to Dock](https://github.com/micheleg/dash-to-dock)

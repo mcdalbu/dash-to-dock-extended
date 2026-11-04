@@ -53,101 +53,46 @@
   <schema path="/org/gnome/shell/extensions/dash-to-dock-soft/" id="org.gnome.shell.extensions.dash-to-dock-extended">
     <key type="b" name="shell-menu-style">
       <default>true</default>
-      <summary>Shell menu outline and shadow</summary>
-      <description>Match the border, corners and outer shadow of the active Shell menu theme. Background colors are controlled separately.</description>
+      <summary>Shell menu borders and corners</summary>
+      <description>Match the border and corners of the active Shell menu theme. Background colors are controlled separately.</description>
     </key>
-    <key type="b" name="shell-menu-colors">
+    <key type="b" name="shell-menu-shadow">
       <default>true</default>
-      <summary>Use Shell menu background colors</summary>
-      <description>Use the background, separator and hover colors of the Shell dash icon context menus. Keep the dock opacity and follow theme changes independently of the Shell outline and shadow. The saved custom color is restored when disabled.</description>
-    </key>
-    <key type="b" name="shell-menu-keep-dock-radius">
-      <default>false</default>
-      <summary>Keep the default Dash to Dock corner radius</summary>
-      <description>Keep the corners supplied by the dock theme while using the Shell menu border and shadow, including compact and panel modes.</description>
+      <summary>Outer shadow from the Shell menu appearance</summary>
     </key>
     <key type="i" name="dock-shadow-intensity">
       <default>100</default>
       <range min="0" max="200"/>
       <summary>Outer shadow intensity relative to the Shell menu theme</summary>
-      <description>100 keeps the exact Quick Settings shadow, 0 removes it and 200 doubles its opacity, capped at fully opaque. The border, blur radius and shadow dimensions remain unchanged.</description>
     </key>
     <key type="i" name="dock-shadow-size">
       <default>100</default>
       <range min="0" max="200"/>
-      <summary>Outer shadow size relative to the Shell menu theme</summary>
-      <description>Scale the shadow offsets, blur and spread together. 100 keeps the theme dimensions, 0 removes the shadow and 200 doubles its size. Color and opacity remain independent.</description>
+      <summary>Outer shadow dimensions relative to the Shell menu theme</summary>
     </key>
+    <key type="b" name="shell-menu-colors">
+      <default>true</default>
+      <summary>Use Shell menu background colors</summary>
+      <description>Use the background, separator and hover colors of the Shell dash icon context menus. Keep the dock opacity and follow theme changes independently of the Shell borders and corners. The saved custom color is restored when disabled.</description>
+    </key>
+    <key type="b" name="shell-menu-keep-dock-radius">
+      <default>false</default>
+      <summary>Keep the default Dash to Dock corner radius</summary>
+      <description>Keep the corners supplied by the dock theme while using the Shell menu border, including compact and panel modes.</description>
+    </key>
+
     <key type="i" name="dock-height">
       <default>0</default>
       <range min="-12" max="12"/>
       <summary>Dock vertical position offset in logical pixels</summary>
       <description>Adjust between -12 and +12 logical pixels. Positive values move the dock up, negative values move it down. Zero keeps its original position. The dock can move beyond its monitor edges; its thickness and icon size are unchanged.</description>
     </key>
-    <key type="b" name="icon-shadow">
-      <default>false</default>
-      <summary>Soft icon shadow</summary>
-      <description>Add a subtle shadow below application icons and the Show Applications icon.</description>
-    </key>
-    <key type="i" name="icon-shadow-intensity">
-      <default>24</default>
-      <range min="0" max="100"/>
-      <summary>Icon shadow intensity</summary>
-      <description>Opacity of the icon shadow, from 0 to 100 percent.</description>
-    </key>
-    <key type="i" name="icon-shadow-offset-x">
-      <default>0</default>
-      <range min="-32" max="32"/>
-      <summary>Horizontal icon shadow offset</summary>
-      <description>Horizontal offset in logical pixels; negative values move the shadow to the left.</description>
-    </key>
-    <key type="i" name="icon-shadow-offset-y">
-      <default>2</default>
-      <range min="-32" max="32"/>
-      <summary>Vertical icon shadow offset</summary>
-      <description>Vertical offset in logical pixels; positive values move the shadow below the icon.</description>
-    </key>
-    <key type="i" name="icon-shadow-blur">
-      <default>4</default>
-      <range min="0" max="32"/>
-      <summary>Icon shadow blur</summary>
-      <description>Shadow blur in logical pixels; zero produces a sharp shadow.</description>
-    </key>
-    <key type="b" name="dock-outline">
-      <default>false</default>
-      <summary>Adwaita-inspired dock outline</summary>
-      <description>Add a thin outline around the dock background, preserving its corner radius and adapting contrast to its color.</description>
-    </key>
-    <key type="i" name="dock-outline-intensity">
-      <default>15</default>
-      <range min="0" max="100"/>
-      <summary>Dock outline intensity</summary>
-      <description>Opacity of the dock outline, from 0 to 100 percent. The outline color adapts to the dock background.</description>
-    </key>
-    <key type="b" name="dock-blur">
-      <default>true</default>
-      <summary>Blur behind the dock</summary>
-      <description>Apply native dynamic background blur behind the dock while preserving the configured surface opacity. Icons remain sharp.</description>
-    </key>
-    <key type="i" name="dock-blur-radius">
-      <default>30</default>
-      <range min="1" max="100"/>
-      <summary>Dock blur radius</summary>
-      <description>Blur radius in logical pixels, adjusted for the display scale.</description>
-    </key>
-    <key type="i" name="dock-blur-brightness">
-      <default>85</default>
-      <range min="10" max="100"/>
-      <summary>Blur brightness (%)</summary>
-      <description>Brightness of the blurred backdrop, using the same percentage as Gnome Extended.</description>
-    </key>
-    <key type="i" name="dock-blur-corner-radius">
-      <default>24</default>
-      <range min="0" max="100"/>
-      <summary>Dock blur corner radius</summary>
-      <description>Rounded blur corner radius in logical pixels. Requires GNOME Rounded Blur or native corner-radius support, following Blur my Shell.</description>
-    </key>
-    <key name="dock-position" enum="org.gnome.shell.extensions.dash-to-dock-extended.position">
+
+
+
+
+
+<key name="dock-position" enum="org.gnome.shell.extensions.dash-to-dock-extended.position">
       <default>'BOTTOM'</default>
       <summary>Dock position</summary>
       <description>Dock is shown on the Left, Right, Top or Bottom side of the screen.</description>
@@ -736,5 +681,5 @@
       <summary>Wether the application-provioded counter via Unity API should override the notifications or be summed to it</summary>
       <description>If an application provides a counter through the Unity API, then such value will be used. Otherwise the counter will be summed with the unread notification numbers (if enabled)</description>
     </key>
-  </schema>
+</schema>
 </schemalist>

@@ -10,13 +10,13 @@
   ],
   "uuid": "dash-to-dock-extended@local",
   "name": "Dash to Dock Extended",
-  "description": "An independent fork of Dash to Dock maintained by mcdalbu, with GNOME Shell menu borders, rounded corners and adjustable outer shadows, vertical positioning and native dynamic background blur. Based on Dash to Dock by Michele G. and contributors.",
+  "description": "Independent Dash to Dock fork with Shell menu borders, corners, colors and hover appearance, plus vertical positioning. Blur and icon effects are provided separately by GNOME Extended.",
   "original-author": "micxgx@gmail.com",
   "url": "https://github.com/mcdalbu/dash-to-dock-extended",
   "gettext-domain": "dashtodock",
-  "version": 26,
+  "version": 28,
   "settings-schema": "org.gnome.shell.extensions.dash-to-dock-extended",
   "upstream-url": "https://github.com/micheleg/dash-to-dock",
   "fork-maintainer": "mcdalbu",
-  "version-name": "26"
+  "version-name": "28"
 }
