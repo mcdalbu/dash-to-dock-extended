@@ -17,40 +17,44 @@ def test_highlight_colors(evaluate, check):
         });
         dock.dash._box.add_child(highlightProbe);
         globalThis.interfaceSettings = new Gio.Settings({schema_id: 'org.gnome.desktop.interface'});
-        globalThis.highlightMatches = (button, color, opacity) => {
+        globalThis.highlightMatches = (button, color) => {
             const actual = button.child.get_theme_node().get_background_color();
             return ['red', 'green', 'blue'].every(k => actual[k] === color[k]) &&
-                Math.abs(actual.alpha - color.alpha * opacity) <= 1;
+                Math.abs(actual.alpha - color.alpha) <= 1;
         };
     })()''')
     try:
         for theme in ['prefer-dark', 'prefer-light']:
             evaluate(f'interfaceSettings.set_string("color-scheme", "{theme}");')
             time.sleep(0.4)
+            evaluate('manager.settings.set_boolean("shell-menu-colors", false); '
+                     'highlightButtons.forEach(b => b.add_style_class_name("focused"));')
+            evaluate('globalThis.defaultFocusColors = highlightButtons.slice(0, 2).map(b => { '
+                     'const c = b.child.get_theme_node().get_background_color(); '
+                     'return {red:c.red, green:c.green, blue:c.blue, alpha:c.alpha}; });')
+            evaluate('manager.settings.set_boolean("shell-menu-colors", true);')
             for opacity in [0, 0.35, 1]:
                 evaluate(f'manager.settings.set_double("background-opacity", {opacity}); '
                          'highlightButtons.forEach(b => b.add_style_class_name("focused"));')
                 time.sleep(0.1)
-                check(f'{theme}-focus-opacity-{opacity}', f'''(() => {{
-                    const color = dock._themeManager._colorHover.actor.get_theme_node().get_background_color();
-                    return color.alpha > 0 && highlightButtons.slice(0, 2).every(b => highlightMatches(b, color, {opacity}));
-                }})()''')
+                check(f'{theme}-default-focus-opacity-{opacity}',
+                      'highlightButtons.slice(0, 2).every((b, i) => highlightMatches(b, defaultFocusColors[i]))')
                 evaluate('highlightButtons.forEach(b => b.add_style_pseudo_class("hover"));')
                 check(f'{theme}-hover-focused-{opacity}', '''(() => {
                     const color = dock._themeManager._colorHover.actor.get_theme_node().get_background_color();
-                    return highlightButtons.every(b => highlightMatches(b, color, 1));
+                    return highlightButtons.every(b => highlightMatches(b, color));
                 })()''')
                 evaluate('highlightButtons.forEach(b => b.remove_style_class_name("focused"));')
                 check(f'{theme}-hover-idle-{opacity}', '''(() => {
                     const color = dock._themeManager._colorHover.actor.get_theme_node().get_background_color();
-                    return highlightButtons.every(b => highlightMatches(b, color, 1));
+                    return highlightButtons.every(b => highlightMatches(b, color));
                 })()''')
                 evaluate('highlightButtons.forEach(b => b.remove_style_pseudo_class("hover"));')
             evaluate('manager.settings.set_boolean("shell-menu-colors", false); '
                      'manager.settings.set_double("background-opacity", 0.35); '
                      'highlightButtons.forEach(b => b.add_style_class_name("focused"));')
-            check(f'{theme}-custom-focus-opacity', '''highlightButtons.slice(0, 2).every(b =>
-                highlightMatches(b, {red:238, green:238, blue:238, alpha:51}, 0.35))''')
+            check(f'{theme}-custom-default-focus',
+                  'highlightButtons.slice(0, 2).every((b, i) => highlightMatches(b, defaultFocusColors[i]))')
             evaluate('manager.settings.set_boolean("shell-menu-colors", true); '
                      'highlightButtons.forEach(b => b.remove_style_class_name("focused"));')
     finally:

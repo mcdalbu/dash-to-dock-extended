@@ -1,3 +1,9 @@
+# Dash to Dock Extended 30 — 7 de novembro de 2026
+
+- Restaurado o destaque padrão do tema para o aplicativo em foco.
+- A barra de opacidade volta a controlar somente o fundo do dock; o destaque
+  dos ícones permanece independente. O hover com as cores do Shell é mantido.
+
 # Dash to Dock Extended 29 — 4 de novembro de 2026
 
 - O destaque persistente do aplicativo ativo usa a cor do menu do tema quando

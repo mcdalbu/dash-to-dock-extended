@@ -1,3 +1,12 @@
+# Validação da versão 30 — 7 de novembro de 2026
+
+`make check`: PASS. Sessão isolada do GNOME Shell com
+`SOFT_TEST_LABEL=default-highlight /usr/bin/python3 tests/shell-menu-headless.py`: PASS.
+Destaque do aplicativo em foco igual ao padrão do tema em 0%, 35% e 100%
+de opacidade do dock, nos temas claro e escuro. Hover, preferências e
+ativação/desativação das cores do Shell preservados.
+Resultado: `validation/shell-menu-default-highlight-results.json`.
+
 # Validação da versão 29
 
 Destaques da versão 29 (4 de novembro de 2026): `make check` e
