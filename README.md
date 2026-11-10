@@ -128,7 +128,7 @@ retos, enquanto a superfície continua arredondada. A biblioteca é opcional e n
 ## Instalar
 
 ```bash
-gnome-extensions install --force dash-to-dock-extended@local_v26.zip
+gnome-extensions install --force dash-to-dock-extended@local_v31.zip
 ```
 
 Encerre a sessão e entre novamente para carregar a atualização. Depois:
@@ -152,7 +152,7 @@ make
 make check
 node tests/dock-effects.cjs
 node tests/dock-redraw-recovery.cjs
-make zip-file VERSION=21
+make zip-file VERSION=31
 ```
 
 O teste de integração inicia um GNOME Shell 50 headless em D-Bus e diretórios de

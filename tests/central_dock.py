@@ -39,7 +39,8 @@ def test_central_dock(evaluate, check, screenshot, results):
     evaluate('central._appGrid._settings.set_boolean("icon-shadow-dock-enabled", true);')
     check('no-duplicate-icon-shadow', '!dock._themeManager._hoverCss?.includes("icon-shadow:")')
     evaluate('central._settings.set_boolean("docks", false);')
-    check('central-toggle-off', '!central._docks._records.get(dock).surface && !dock._themeManager._blurEffect')
+    check('central-toggle-off',
+          '!central._docks._records.get(dock).surface?._blur.mapped && !dock._themeManager._blurEffect')
     evaluate('central._settings.set_boolean("docks", true);')
     time.sleep(0.2)
     check('central-toggle-on', 'central._docks._records.get(dock).surface._blur.mapped')

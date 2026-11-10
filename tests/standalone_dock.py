@@ -62,6 +62,85 @@ def test_highlight_colors(evaluate, check):
                  'manager.settings.reset("background-opacity");')
 
 
+def test_dynamic_transparency(evaluate, check):
+    evaluate('manager.settings.set_enum("transparency-mode", 3);')
+    time.sleep(.3)
+    evaluate('''globalThis.transparency = dock._themeManager._transparency;
+        globalThis.nearDock = false;
+        globalThis.dockProximityChecks = 0;
+        globalThis.dockStyleUpdates = 0;
+        transparency._dockIsNear = () => { dockProximityChecks++; return nearDock; };
+        transparency._updateSolidStyle();
+        globalThis.dockStyleSignal = transparency.connect('solid-style-updated', () => dockStyleUpdates++);
+        dockProximityChecks = 0;
+        for (let i = 0; i < 10; i++) transparency._queueSolidStyle();''')
+    try:
+        time.sleep(.2)
+        check('dynamic-dock-batches-proximity-and-skips-unchanged-style',
+              'dockProximityChecks === 1 && dockStyleUpdates === 0')
+        evaluate('nearDock = true; transparency._queueSolidStyle();')
+        time.sleep(.2)
+        check('dynamic-dock-applies-changed-style',
+              'dockProximityChecks === 2 && dockStyleUpdates === 1 && dock.has_style_class_name("opaque")')
+    finally:
+        evaluate('transparency.disconnect(dockStyleSignal); delete transparency._dockIsNear; '
+                 'manager.settings.reset("transparency-mode");')
+
+
+def test_intellihide_batching(evaluate, check):
+    evaluate('''globalThis.overlapProbe = dock._intellihide;
+        globalThis.overlapWasEnabled = overlapProbe._isEnabled;
+        globalThis.overlapTarget = overlapProbe._targetBox;
+        if (!overlapWasEnabled) overlapProbe.enable();
+        overlapProbe.updateTargetBox(new imports.gi.Clutter.ActorBox({x1:0,y1:0,x2:20,y2:500}));''')
+    time.sleep(.4)
+    evaluate('''globalThis.overlapChecks = 0;
+        const original = overlapProbe._doCheckOverlap;
+        overlapProbe._doCheckOverlap = function () { overlapChecks++; return original.call(this); };
+        overlapProbe._checkOverlap();''')
+    try:
+        time.sleep(.35)
+        check('intellihide-single-event-checks-once', 'overlapChecks === 1 && !overlapProbe._checkOverlapTimeoutId')
+        evaluate('overlapChecks = 0; for (let i=0; i<10; i++) overlapProbe._checkOverlap()')
+        time.sleep(.35)
+        check('intellihide-burst-keeps-one-trailing-check', 'overlapChecks === 2 && !overlapProbe._checkOverlapTimeoutId')
+    finally:
+        evaluate('delete overlapProbe._doCheckOverlap; '
+                 'if (!overlapWasEnabled) overlapProbe.disable(); '
+                 'overlapProbe.updateTargetBox(overlapTarget);')
+
+
+def test_intellihide_window_signals(evaluate, check):
+    evaluate('''globalThis.signalsProbe = dock._intellihide;
+        globalThis.intelliWasEnabled = signalsProbe._isEnabled;
+        globalThis.probeActor = new imports.gi.St.Widget();
+        globalThis.probeMetaWindow = {get_compositor_private: () => probeActor};
+        globalThis.windowCallbacks = 0;
+        signalsProbe._handledWindow = actor => actor === probeActor;
+        signalsProbe._checkOverlap = () => windowCallbacks++;
+        signalsProbe.disable();''')
+    try:
+        check('disabled-intellihide-ignores-new-windows', '''(() => {
+            signalsProbe._windowCreated(null, probeMetaWindow);
+            probeActor.notify('allocation');
+            return signalsProbe._trackedWindows.size === 0 && windowCallbacks === 0;
+        })()''')
+        check('intellihide-registers-and-disconnects-once', '''(() => {
+            signalsProbe.enable();
+            signalsProbe._addWindowSignals(probeActor);
+            signalsProbe._addWindowSignals(probeActor);
+            probeActor.notify('allocation');
+            signalsProbe.disable();
+            probeActor.notify('allocation');
+            return signalsProbe._trackedWindows.size === 0 && windowCallbacks === 1;
+        })()''')
+    finally:
+        evaluate('''delete signalsProbe._handledWindow;
+            delete signalsProbe._checkOverlap;
+            probeActor.destroy();
+            if (intelliWasEnabled) signalsProbe.enable();''')
+
+
 def test_standalone_dock(evaluate, check, screenshot, results):
     check('removed-effect-schemas', 'manager.settings.settings_schema.list_keys().every(k => !/^(dock-blur|icon-shadow|dock-outline)/.test(k))')
     evaluate('manager.settings.set_boolean("shell-menu-style", true); manager.settings.set_boolean("shell-menu-colors", true);')
@@ -74,6 +153,9 @@ def test_standalone_dock(evaluate, check, screenshot, results):
     check('outer-shadow-restored', '!!background.get_theme_node().get_box_shadow()')
     check('shell-menu-hover', '!!dock._themeManager._hoverCss?.includes(":hover")')
     test_highlight_colors(evaluate, check)
+    test_dynamic_transparency(evaluate, check)
+    test_intellihide_batching(evaluate, check)
+    test_intellihide_window_signals(evaluate, check)
     check('no-native-blur', '!dock._themeManager._blurEffect && typeof dock._themeManager._updateBlur === "undefined"')
     evaluate('manager.settings.set_boolean("shell-menu-style", false); manager.settings.set_boolean("shell-menu-colors", false);')
     time.sleep(0.3)

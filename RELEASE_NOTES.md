@@ -1,3 +1,14 @@
+# Dash to Dock Extended 31 — 10 de novembro de 2026
+
+- O Intellihide mantém um observador por janela, libera as conexões ao desativar e agrupa verificações de sobreposição durante uma sequência de eventos.
+- A transparência dinâmica verifica a proximidade uma vez por quadro e reaplica o estilo quando o estado muda.
+- Alterações consecutivas na opacidade e na sombra usam a mesma atualização de tema. O separador fica no lugar quando a lista de ícones permanece igual.
+- O GNOME Extended continua aplicando o blur e as sombras de ícones do dock quando essas opções estão ativadas.
+
+Instale `dash-to-dock-extended@local_v31.zip` com `gnome-extensions install --force`. Saia da sessão e entre novamente para carregar o código.
+
+Validação em sessões isoladas do GNOME Shell 51.1, com o dock sozinho e integrado ao GNOME Extended.
+
 # Dash to Dock Extended 30 — 7 de novembro de 2026
 
 - Restaurado o destaque padrão do tema para o aplicativo em foco.

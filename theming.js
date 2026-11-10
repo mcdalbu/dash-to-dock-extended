@@ -54,11 +54,13 @@ function getShellMenuBox() {
  * window-driven transparency changes. Keep icon actors and theme radii intact.
  *
  * @param dock
+ * @param baseStyle
+ * @param dynamicAlpha
  */
-function applyDockSurfaceStyle(dock) {
+function applyDockSurfaceStyle(dock, baseStyle, dynamicAlpha) {
     const {settings} = Docking.DockManager;
     const background = dock.dash._background;
-    let style = background.get_style() || '';
+    let style = baseStyle ?? (background.get_style() || '');
     if (style && !style.trimEnd().endsWith(';'))
         style += ';';
     style += 'box-shadow: none;';
@@ -72,9 +74,9 @@ function applyDockSurfaceStyle(dock) {
     const colorMenu = settings.shellMenuColors ? dock._themeManager?._colorMenu?.box : null;
     if (colorMenu) {
         const color = colorMenu.get_theme_node().get_background_color();
-        const alpha = settings.transparencyMode === TransparencyMode.FIXED
+        const alpha = dynamicAlpha ?? (settings.transparencyMode === TransparencyMode.FIXED
             ? opacityFraction(settings.backgroundOpacity, 1)
-            : background.get_theme_node().get_background_color().alpha / 255;
+            : background.get_theme_node().get_background_color().alpha / 255);
         style += `background-color: rgba(${color.red}, ${color.green}, ${color.blue}, ${alpha});`;
     }
     if (colorMenu)
@@ -491,8 +493,8 @@ export class ThemeManager {
         this._updateCustomStyleClasses();
         this._updateDashOpacity();
         this._updateDashColor();
-        this._adjustTheme();
-        applyDockSurfaceStyle(this._actor);
+        if (!this._adjustTheme())
+            applyDockSurfaceStyle(this._actor);
         this._updateSeparatorColor();
         this._shellMenuSignature = signature;
         this.emit('updated');
@@ -510,7 +512,7 @@ export class ThemeManager {
 
         // If built-in theme is enabled do nothing else
         if (settings.applyCustomTheme)
-            return;
+            return false;
 
         let newStyle = '';
         const position = Utils.getPosition(settings);
@@ -545,12 +547,14 @@ export class ThemeManager {
         const defaultTransparency = settings.transparencyMode === TransparencyMode.DEFAULT;
         if (!defaultTransparency && !fixedTransparency) {
             this._transparency.enable();
+            return true;
         } else if (!defaultTransparency || settings.customBackgroundColor) {
             newStyle = `${newStyle}background-color:${this._customizedBackground}; ` +
                        `border-color:${this._customizedBorder}; ` +
                        'transition-delay: 0s; transition-duration: 0.250s;';
             this._dash._background.set_style(newStyle);
         }
+        return false;
     }
 
     _bindSettingsChanges() {
@@ -573,10 +577,12 @@ export class ThemeManager {
             'extend-height',
             'force-straight-corner'];
 
+        const sliderKeys = new Set(['dock-shadow-intensity', 'dock-shadow-size',
+            'min-alpha', 'max-alpha', 'background-opacity']);
         this._signalsHandler.addWithLabel(Labels.THEME_CHANGED, ...keys.map(key => [
             Docking.DockManager.settings,
             `changed::${key}`,
-            () => this.updateCustomTheme(),
+            () => sliderKeys.has(key) ? this._queueUpdateCustomTheme() : this.updateCustomTheme(),
         ]));
     }
 }
@@ -591,7 +597,6 @@ class Transparency {
     constructor(dock) {
         this._dash = dock.dash;
         this._actor = this._dash._container;
-        this._backgroundActor = this._dash._background;
         this._dockActor = dock;
         this._dock = dock;
         this._panel = Main.panel;
@@ -610,6 +615,7 @@ class Transparency {
 
         this._signalsHandler = new Utils.GlobalSignalsHandler();
         this._trackedWindows = new Map();
+        this._solidLater = 0;
     }
 
     enable() {
@@ -642,29 +648,19 @@ class Transparency {
         ], [
             global.window_manager,
             'switch-workspace',
-            this._updateSolidStyle.bind(this),
+            this._queueSolidStyle.bind(this),
         ], [
             Main.overview,
             'hiding',
-            this._updateSolidStyle.bind(this),
+            this._queueSolidStyle.bind(this),
         ], [
             Main.overview,
             'showing',
-            this._updateSolidStyle.bind(this),
+            this._queueSolidStyle.bind(this),
         ]);
 
-        // Window signals
-        global.window_group.get_children().filter(child => {
-            // An irrelevant window actor ('Gnome-shell') produces an error when the signals are
-            // disconnected, therefore do not add signals to it.
-            return child instanceof Meta.WindowActor &&
-                   child.get_meta_window().get_wm_class() !== 'Gnome-shell';
-        }).forEach(function (win) {
-            this._onWindowActorAdded(null, win);
-        }, this);
-
-        if (this._actor.get_stage())
-            this._updateSolidStyle();
+        for (const child of global.window_group.get_children())
+            this._onWindowActorAdded(null, child);
 
         this._updateStyles();
         this._updateSolidStyle();
@@ -676,6 +672,12 @@ class Transparency {
         // ensure I never double-register/inject
         // although it should never happen
         this._signalsHandler.removeWithLabel(Labels.TRANSPARENCY);
+        if (this._solidLater) {
+            Utils.laterRemove(this._solidLater);
+            this._solidLater = 0;
+        }
+        this._lastSolidStyle = null;
+        this._lastIsNear = null;
 
         for (const key of this._trackedWindows.keys()) {
             this._trackedWindows.get(key).forEach(id => {
@@ -693,11 +695,19 @@ class Transparency {
     }
 
     _onWindowActorAdded(container, metaWindowActor) {
+        // The group also holds backgrounds and other extensions' blur actors.
+        if (!(metaWindowActor instanceof Meta.WindowActor) ||
+            metaWindowActor.get_meta_window()?.get_wm_class() === 'Gnome-shell' ||
+            this._trackedWindows.has(metaWindowActor))
+            return;
+
         const signalIds = [];
         ['notify::allocation', 'notify::visible'].forEach(s => {
-            signalIds.push(metaWindowActor.connect(s, this._updateSolidStyle.bind(this)));
+            signalIds.push(metaWindowActor.connect(s, this._queueSolidStyle.bind(this)));
         });
         this._trackedWindows.set(metaWindowActor, signalIds);
+        if (container)
+            this._queueSolidStyle();
     }
 
     _onWindowActorRemoved(container, metaWindowActor) {
@@ -708,22 +718,30 @@ class Transparency {
             metaWindowActor.disconnect(id);
         });
         this._trackedWindows.delete(metaWindowActor);
-        this._updateSolidStyle();
+        this._queueSolidStyle();
+    }
+
+    _queueSolidStyle() {
+        if (this._solidLater)
+            return;
+        this._solidLater = Utils.laterAdd(Meta.LaterType.BEFORE_REDRAW, () => {
+            this._solidLater = 0;
+            this._updateSolidStyle();
+        });
     }
 
     _updateSolidStyle() {
         const isNear = this._dockIsNear();
-        if (isNear) {
-            this._backgroundActor.set_style(this._opaque_style);
-            this._dockActor.remove_style_class_name('transparent');
-            this._dockActor.add_style_class_name('opaque');
-        } else {
-            this._backgroundActor.set_style(this._transparent_style);
-            this._dockActor.remove_style_class_name('opaque');
-            this._dockActor.add_style_class_name('transparent');
-        }
+        const style = isNear ? this._opaque_style : this._transparent_style;
+        if (isNear === this._lastIsNear && style === this._lastSolidStyle)
+            return;
+        this._lastIsNear = isNear;
+        this._lastSolidStyle = style;
+        this._dockActor.remove_style_class_name(isNear ? 'transparent' : 'opaque');
+        this._dockActor.add_style_class_name(isNear ? 'opaque' : 'transparent');
 
-        applyDockSurfaceStyle(this._dock);
+        const alpha = isNear ? this._opaqueAlpha : this._transparentAlpha;
+        applyDockSurfaceStyle(this._dock, style, Math.round(alpha * 255) / 255);
         this.emit('solid-style-updated', isNear);
     }
 
@@ -733,13 +751,6 @@ class Transparency {
         /* Get all the windows in the active workspace that are in the primary monitor and visible */
         const activeWorkspace = global.workspace_manager.get_active_workspace();
         const dash = this._dash;
-        const windows = activeWorkspace.list_windows().filter(metaWindow => {
-            return metaWindow.get_monitor() === dash._monitorIndex &&
-                   metaWindow.showing_on_its_workspace() &&
-                   metaWindow.get_window_type() !== Meta.WindowType.DESKTOP &&
-                   !metaWindow.skip_taskbar;
-        });
-
         /* Check if at least one window is near enough to the panel.
          * If the dock is hidden, we need to account for the space it would take
          * up when it slides out. This is avoid an ugly transition.
@@ -760,24 +771,22 @@ class Transparency {
             threshold = topCoord - this._actor.get_height() * factor;
 
         const scale = St.ThemeContext.get_for_stage(global.stage).scale_factor;
-        const isNearEnough = windows.some(metaWindow => {
-            let coord;
-            if (this._position === St.Side.LEFT) {
-                coord = metaWindow.get_frame_rect().x;
-                return coord < threshold + 5 * scale;
-            } else if (this._position === St.Side.RIGHT) {
-                coord = metaWindow.get_frame_rect().x + metaWindow.get_frame_rect().width;
-                return coord > threshold - 5 * scale;
-            } else if (this._position === St.Side.TOP) {
-                coord = metaWindow.get_frame_rect().y;
-                return coord < threshold + 5 * scale;
-            } else {
-                coord = metaWindow.get_frame_rect().y + metaWindow.get_frame_rect().height;
-                return coord > threshold - 5 * scale;
-            }
-        });
+        return activeWorkspace.list_windows().some(metaWindow => {
+            if (metaWindow.get_monitor() !== dash._monitorIndex ||
+                !metaWindow.showing_on_its_workspace() ||
+                metaWindow.get_window_type() === Meta.WindowType.DESKTOP ||
+                metaWindow.skip_taskbar)
+                return false;
 
-        return isNearEnough;
+            const frame = metaWindow.get_frame_rect();
+            if (this._position === St.Side.LEFT)
+                return frame.x < threshold + 5 * scale;
+            if (this._position === St.Side.RIGHT)
+                return frame.x + frame.width > threshold - 5 * scale;
+            if (this._position === St.Side.TOP)
+                return frame.y < threshold + 5 * scale;
+            return frame.y + frame.height > threshold - 5 * scale;
+        });
     }
 
     _updateStyles() {

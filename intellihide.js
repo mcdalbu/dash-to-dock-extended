@@ -63,7 +63,7 @@ export class Intellihide {
         this._status = OverlapStatus.UNDEFINED;
         this._targetBox = null;
 
-        this._checkOverlapTimeoutContinue = false;
+        this._overlapPending = false;
         this._checkOverlapTimeoutId = 0;
 
         this._trackedWindows = new Map();
@@ -113,6 +113,7 @@ export class Intellihide {
 
     disable() {
         this._isEnabled = false;
+        this._overlapPending = false;
 
         for (const wa of this._trackedWindows.keys())
             this._removeWindowSignals(wa);
@@ -131,7 +132,7 @@ export class Intellihide {
     }
 
     _addWindowSignals(wa) {
-        if (!this._handledWindow(wa))
+        if (!this._isEnabled || !wa || this._trackedWindows.has(wa) || !this._handledWindow(wa))
             return;
 
         this._trackedWindows.set(wa, [
@@ -168,23 +169,21 @@ export class Intellihide {
 
         /* Limit the number of calls to the doCheckOverlap function */
         if (this._checkOverlapTimeoutId) {
-            this._checkOverlapTimeoutContinue = true;
+            this._overlapPending = true;
             return;
         }
 
-        this._doCheckOverlap();
-
         this._checkOverlapTimeoutId = GLib.timeout_add(
             GLib.PRIORITY_DEFAULT, INTELLIHIDE_CHECK_INTERVAL, () => {
-                this._doCheckOverlap();
-                if (this._checkOverlapTimeoutContinue) {
-                    this._checkOverlapTimeoutContinue = false;
-                    return GLib.SOURCE_CONTINUE;
-                } else {
+                if (!this._overlapPending) {
                     this._checkOverlapTimeoutId = 0;
                     return GLib.SOURCE_REMOVE;
                 }
+                this._overlapPending = false;
+                this._doCheckOverlap();
+                return this._checkOverlapTimeoutId ? GLib.SOURCE_CONTINUE : GLib.SOURCE_REMOVE;
             });
+        this._doCheckOverlap();
     }
 
     _doCheckOverlap() {

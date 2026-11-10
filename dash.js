@@ -865,9 +865,11 @@ export const DockDash = GObject.registerClass({
             oldApps = oldApps.filter(app => !app.isTrash);
         }
 
-        // Temporary remove the separator so that we don't compute to position icons
         const oldSeparatorPos = this._box.get_children().indexOf(this._separator);
-        if (this._separator)
+        const appsChanged = oldApps.length !== newApps.length ||
+            oldApps.some((app, index) => app !== newApps[index]);
+        // The icon diff uses positions without the separator.
+        if (appsChanged && oldSeparatorPos >= 0)
             this._box.remove_child(this._separator);
 
         // Figure out the actual changes to the list of items; we iterate
@@ -984,7 +986,10 @@ export const DockDash = GObject.registerClass({
             const removedFavorites = removedActors.filter(a =>
                 children.indexOf(a) < oldSeparatorPos);
             pos += removedFavorites.length;
-            this._box.insert_child_at_index(this._separator, pos);
+            if (!this._separator.get_parent())
+                this._box.insert_child_at_index(this._separator, pos);
+            else if (pos !== oldSeparatorPos)
+                this._box.set_child_at_index(this._separator, pos);
         } else if (this._separator) {
             this._separator.destroy();
             this._separator = null;
