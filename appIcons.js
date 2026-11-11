@@ -818,6 +818,9 @@ export const DockAbstractAppIcon = GObject.registerClass({
     }
 
     updateNumberOverlay() {
+        if (!this._numberOverlayBin.visible)
+            return;
+
         // We apply an overall scale factor that might come from a HiDPI monitor.
         // Clutter dimensions are in physical pixels, but CSS measures are in logical
         // pixels, so make sure to consider the scale.
@@ -827,22 +830,24 @@ export const DockAbstractAppIcon = GObject.registerClass({
         const [minWidth_, natWidth] = this._iconContainer.get_preferred_width(-1);
         const fontSize = Math.round(Math.max(12, 0.3 * natWidth) / scaleFactor);
         const size = Math.round(fontSize * 1.2);
-        this._numberOverlayLabel.set_style(
-            `font-size: ${fontSize}px;` +
-           `border-radius: ${this.icon.iconSize}px;` +
-           `width: ${size}px; height: ${size}px;`
-        );
+        const style = `font-size: ${fontSize}px;` +
+            `border-radius: ${this.icon.iconSize}px;` +
+            `width: ${size}px; height: ${size}px;`;
+        if (this._numberOverlayLabel.get_style() !== style)
+            this._numberOverlayLabel.set_style(style);
     }
 
     setNumberOverlay(number) {
+        if (number === this._numberOverlayOrder)
+            return;
         this._numberOverlayOrder = number;
         this._numberOverlayLabel.set_text(number.toString());
     }
 
     toggleNumberOverlay(activate) {
         if (activate && this._numberOverlayOrder > -1) {
-            this.updateNumberOverlay();
             this._numberOverlayBin.show();
+            this.updateNumberOverlay();
         } else {
             this._numberOverlayBin.hide();
         }

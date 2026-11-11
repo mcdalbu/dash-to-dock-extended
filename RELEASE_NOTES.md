@@ -1,3 +1,11 @@
+# Dash to Dock Extended 32 — 11 de novembro de 2026
+
+- Os números dos atalhos deixam de recalcular o estilo enquanto estão ocultos.
+- A primeira exibição prepara o estilo dos rótulos. Alterações no número, no tamanho dos ícones e na escala atualizam os valores necessários.
+- Atualizações da lista de aplicativos reutilizam o texto e o estilo já aplicados.
+
+Instale `dash-to-dock-extended@local_v32.zip` com `gnome-extensions install --force`. Saia da sessão e entre novamente para carregar o código.
+
 # Dash to Dock Extended 31 — 10 de novembro de 2026
 
 - O Intellihide mantém um observador por janela, libera as conexões ao desativar e agrupa verificações de sobreposição durante uma sequência de eventos.

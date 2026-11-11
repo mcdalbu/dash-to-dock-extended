@@ -141,6 +141,46 @@ def test_intellihide_window_signals(evaluate, check):
             if (intelliWasEnabled) signalsProbe.enable();''')
 
 
+def test_number_overlays(evaluate, check):
+    # Theme changes from the preceding test may rebuild the icon actors.
+    time.sleep(.5)
+    check('unchanged-hidden-number-overlays-skip-writes', '''(() => {
+        const icons = dock.dash.getAppIcons();
+        if (!icons.length) return false;
+        let styles = 0, numbers = 0;
+        const restore = [];
+        for (const icon of icons) {
+            icon.toggleNumberOverlay(false);
+            const style = icon._numberOverlayLabel.set_style;
+            const text = icon._numberOverlayLabel.set_text;
+            icon._numberOverlayLabel.set_style = function (...args) {
+                styles++; return style.apply(this, args);
+            };
+            icon._numberOverlayLabel.set_text = function (...args) {
+                numbers++; return text.apply(this, args);
+            };
+            restore.push(() => {
+                delete icon._numberOverlayLabel.set_style;
+                delete icon._numberOverlayLabel.set_text;
+            });
+        }
+        try {for (let i=0; i<3; i++) dock.dash._redisplay();}
+        finally {restore.forEach(f => f());}
+        return styles === 0 && numbers === 0;
+    })()''')
+    state = evaluate('''dock.dash.toggleNumberOverlay(true);
+        dock.dash.getAppIcons().map(icon => ({
+        order: icon._numberOverlayOrder, visible: icon._numberOverlayBin.visible,
+        style: icon._numberOverlayLabel.get_style(),
+        text: icon._numberOverlayLabel.get_text(),
+    }))''')
+    assert all(icon['order'] < 0 or (icon['visible'] and icon['style'] and
+               'font-size' in icon['style'] and icon['text'] == str(icon['order']))
+               for icon in state), state
+    check('number-overlays-style-on-first-show', 'true')
+    evaluate('dock.dash.toggleNumberOverlay(false)')
+
+
 def test_standalone_dock(evaluate, check, screenshot, results):
     check('removed-effect-schemas', 'manager.settings.settings_schema.list_keys().every(k => !/^(dock-blur|icon-shadow|dock-outline)/.test(k))')
     evaluate('manager.settings.set_boolean("shell-menu-style", true); manager.settings.set_boolean("shell-menu-colors", true);')
@@ -153,6 +193,7 @@ def test_standalone_dock(evaluate, check, screenshot, results):
     check('outer-shadow-restored', '!!background.get_theme_node().get_box_shadow()')
     check('shell-menu-hover', '!!dock._themeManager._hoverCss?.includes(":hover")')
     test_highlight_colors(evaluate, check)
+    test_number_overlays(evaluate, check)
     test_dynamic_transparency(evaluate, check)
     test_intellihide_batching(evaluate, check)
     test_intellihide_window_signals(evaluate, check)
