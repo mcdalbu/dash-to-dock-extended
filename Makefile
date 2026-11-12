@@ -30,6 +30,8 @@ EXTRA_MODULES = \
                 prefs.js \
                 theming.js \
                 shellMenuStyle.js \
+                ptyxisPalettes.js \
+                PALETTES.md \
                 dockRedrawRecovery.js \
                 utils.js \
                 dbusmenuUtils.js \

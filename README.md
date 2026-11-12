@@ -1,4 +1,4 @@
-> Versão estável [29](RELEASE_NOTES.md), com visual dos menus do Shell. A sombra externa é opcional no visual dos menus do Shell. Blur e sombra dos ícones são fornecidos pelo GNOME Extended.
+> Versão estável [33](RELEASE_NOTES.md), com visual dos menus do Shell. A sombra externa é opcional no visual dos menus do Shell. Blur e sombra dos ícones são fornecidos pelo GNOME Extended.
 
 # Dash to Dock Extended
 
@@ -9,7 +9,7 @@ menus de notificações/calendário e Quick Settings do GNOME Shell.
 - **Nome:** Dash to Dock Extended
 - **UUID:** `dash-to-dock-extended@local`
 - **Schema:** `org.gnome.shell.extensions.dash-to-dock-extended`
-- **Versão deste fork:** 29
+- **Versão deste fork:** 33
 - **Repositório:** [mcdalbu/dash-to-dock-extended](https://github.com/mcdalbu/dash-to-dock-extended)
 
 Esta versão adota o nome Dash to Dock Extended e um novo UUID e schema.
@@ -19,7 +19,7 @@ A extensão **Gnome Extended** pode continuar ativa para os menus.
 
 ## Visual dos menus do Shell
 
-Em **Preferências → Aparência**, a opção **Contorno e sombra dos menus do Shell**
+Em **Preferências → Temas**, a opção de bordas e cantos dos menus do Shell
 vem ativada. Lê diretamente o estilo do Quick Settings do tema ativo (com o menu
 do relógio como alternativa), incluindo:
 
@@ -60,13 +60,16 @@ preserva as dimensões do tema, valores menores reduzem a sombra e **200%**
 duplica seu tamanho. **0%** remove a sombra. O tamanho é independente da cor
 e da intensidade. Os dois controles ficam disponíveis com o estilo dos menus ativado.
 
-## Cores dos menus do Shell
+## Tema do Shell e paletas do Ptyxis
 
-Em **Preferências → Aparência**, o toggle **Usar as cores dos menus do Shell**
-aplica ao fundo do dock a cor do Quick Settings, com o menu de notificações/calendário
-como alternativa. Acompanha o tema claro/escuro e alterações da cor dos menus.
-Vem ativado para manter o perfil visual do fork e funciona independentemente do
-toggle de contorno e sombra, inclusive com o tema integrado do dock.
+Em **Preferências → Temas**, a lista **Paleta de cores** oferece **Tema do Shell**
+e as 244 paletas incorporadas do Ptyxis 50.1, com busca por nome. As paletas com
+variantes clara e escura acompanham o sistema. Não é necessário instalar o Ptyxis.
+
+A opção **Usar as cores do tema selecionado** aplica a paleta ao fundo, ao
+separador e ao hover. Com **Tema do Shell**, essas cores seguem os menus de
+contexto dos ícones do dash. A opção vem ativada por padrão e funciona
+independentemente dos controles de bordas, cantos e sombra, reunidos nessa aba.
 
 A opacidade continua sendo a do dock: a cor dos menus não copia sua transparência.
 Enquanto esse toggle está ativo, o controle de cor personalizada fica desabilitado.

@@ -1951,7 +1951,7 @@
                                 </child>
                                 <child>
                                   <object class="GtkLabel">
-                                    <property name="label" translatable="yes">Use the background, separator and hover colors of the Shell dash icon context menus while keeping the dock opacity.</property>
+                                    <property name="label" translatable="yes">Aplica as cores de fundo, separador e hover do tema selecionado, mantendo a opacidade do dock.</property>
                                     <property name="xalign">0</property>
                                     <property name="wrap">1</property>
                                     <style><class name="dim-label"/></style>

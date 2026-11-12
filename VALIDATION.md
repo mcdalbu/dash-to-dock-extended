@@ -1,3 +1,15 @@
+# Validação da versão 33 — 12 de novembro de 2026
+
+- `make check`: PASS (estilos, posicionamento, redraw, layout e ESLint).
+- `/usr/bin/python3 tests/palettes-headless.py`: PASS, GNOME Shell 51.1 em compositor e D-Bus privados.
+- Todas as 244 paletas aplicadas ao dock com opacidade de 35%.
+- GNOME clara/escura alternando conforme o sistema: PASS.
+- Paleta desconhecida volta às cores do Shell; desativar a opção remove o hover personalizado: PASS.
+- Preferências GTK reais: aba Temas, lista de 245 opções (Shell + 244 paletas), leitura/escrita da seleção e controles de sombra: PASS.
+- Capturas: `validation/palettes-v33-preferences.png` e `validation/palettes-v33-dock.png`.
+- Avisos GTK preexistentes de introspecção de espaçamento e finalização de GtkCheckButton observados. Nenhuma falha de teste.
+- Outras versões do GNOME não foram executadas nesta validação. A instalação da sessão do usuário não foi alterada.
+
 # Validação da versão 30 — 7 de novembro de 2026
 
 `make check`: PASS. Sessão isolada do GNOME Shell com

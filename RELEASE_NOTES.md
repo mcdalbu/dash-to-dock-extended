@@ -1,3 +1,12 @@
+# Dash to Dock Extended 33 — 12 de novembro de 2026
+
+- Nova aba **Temas**, com a opção **Tema do Shell** e as 244 paletas incorporadas do Ptyxis 50.1 em uma lista pesquisável.
+- Bordas, cantos e sombra do Shell ficam reunidos nessa aba.
+- Paletas com variantes clara/escura acompanham o sistema. Fundo, hover e separador usam as cores selecionadas; a opacidade e as cores dos ícones são preservadas.
+- Configurações existentes continuam válidas. Não é necessário instalar o Ptyxis.
+
+Instale `dash-to-dock-extended@local_v33.zip` com `gnome-extensions install --force`. Saia da sessão e entre novamente para carregar o código.
+
 # Dash to Dock Extended 32 — 11 de novembro de 2026
 
 - Os números dos atalhos deixam de recalcular o estilo enquanto estão ocultos.

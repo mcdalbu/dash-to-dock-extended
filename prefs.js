@@ -15,6 +15,8 @@ import {
     gettext as __,
 } from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
+import {PTYXIS_PALETTES} from './ptyxisPalettes.js';
+
 const SCALE_UPDATE_TIMEOUT = 500;
 const DEFAULT_ICONS_SIZES = [128, 96, 64, 48, 32, 24, 16];
 
@@ -221,21 +223,31 @@ const DockSettings = GObject.registerClass({
         const valuePosition = this._rtl ? Gtk.PositionType.LEFT : Gtk.PositionType.RIGHT;
         const appearance = this._builder.get_object('listbox1');
         const rowFor = id => this._builder.get_object(id).get_ancestor(Gtk.ListBoxRow);
-        const appearanceOrder = ['shell_menu_style_switch', 'shell_menu_colors_switch',
-            'shell_menu_keep_dock_radius_switch'];
-        for (const [index, id] of appearanceOrder.entries()) {
+        const themes = new Gtk.ListBox({
+            selection_mode: Gtk.SelectionMode.NONE,
+            css_classes: ['boxed-list'],
+        });
+        this._themesList = themes;
+        for (const id of ['shell_menu_style_switch', 'shell_menu_colors_switch',
+            'shell_menu_keep_dock_radius_switch']) {
             const row = rowFor(id);
             appearance.remove(row);
-            appearance.insert(row, index);
+            themes.append(row);
         }
-        const sections = new Map([[rowFor('shell_menu_style_switch'), __('Shell menu appearance')]]);
-        appearance.set_header_func((row, previous) => {
-            const title = sections.get(row);
-            row.set_header(title ? new Gtk.Label({
-                label: title, xalign: 0, margin_start: 12, margin_bottom: 8,
-                margin_top: previous ? 16 : 0, css_classes: ['heading'],
-            }) : null);
+        const content = new Gtk.Box({
+            orientation: Gtk.Orientation.VERTICAL,
+            spacing: 18, margin_start: 12, margin_end: 12, margin_top: 12, margin_bottom: 12,
         });
+        content.append(new Gtk.Label({
+            label: 'Tema do Shell e paletas do Ptyxis',
+            xalign: 0, css_classes: ['heading'],
+        }));
+        content.append(themes);
+        const scroll = new Gtk.ScrolledWindow({
+            hscrollbar_policy: Gtk.PolicyType.NEVER,
+            vexpand: true, child: content,
+        });
+        notebook.insert_page(scroll, new Gtk.Label({label: 'Temas'}), 3);
         this._preferenceSizeGroups = [];
         for (let page = 0; page < notebook.get_n_pages(); page++) {
             const labels = new Gtk.SizeGroup({mode: Gtk.SizeGroupMode.HORIZONTAL});
@@ -289,6 +301,9 @@ const DockSettings = GObject.registerClass({
     }
 
     _onWindowsClosed() {
+        if (this._paletteSignal)
+            this._settings.disconnect(this._paletteSignal);
+        this._paletteSignal = 0;
         for (const id of this._surfaceSignals ?? [])
             this._settings.disconnect(id);
         this._surfaceSignals = [];
@@ -1036,6 +1051,24 @@ const DockSettings = GObject.registerClass({
 
         // Appearance Panel
 
+        const paletteIds = ['shell', ...PTYXIS_PALETTES.map(item => item.id)];
+        const palette = new Adw.ComboRow({
+            name: 'setting-dock-palette', title: 'Paleta de cores',
+            subtitle: 'As paletas com variantes clara e escura acompanham o sistema.',
+            model: Gtk.StringList.new(['Tema do Shell', ...PTYXIS_PALETTES.map(item => item.name)]),
+            enable_search: true,
+        });
+        const syncPalette = () => {
+            palette.selected = Math.max(0, paletteIds.indexOf(this._settings.get_string('dock-palette')));
+        };
+        syncPalette();
+        palette.connect('notify::selected', () => {
+            this._settings.set_string('dock-palette', paletteIds[palette.selected]);
+        });
+        this._paletteSignal = this._settings.connect('changed::dock-palette', syncPalette);
+        this._themesList.prepend(palette);
+        this._builder.get_object('shell_menu_colors_label').label = 'Usar as cores do tema selecionado';
+
         this._settings.bind('shell-menu-style',
             this._builder.get_object('shell_menu_style_switch'),
             'active',
@@ -1061,8 +1094,8 @@ const DockSettings = GObject.registerClass({
             subtitle: 'Usa a sombra do tema dos menus do Shell.',
         });
         this._settings.bind('shell-menu-shadow', menuShadow, 'active', Gio.SettingsBindFlags.DEFAULT);
-        const list = this._builder.get_object('listbox1');
-        list.insert(menuShadow, 3);
+        const list = this._themesList;
+        list.insert(menuShadow, 4);
         const shadowRows = [];
         for (const [key, title] of [
             ['dock-shadow-intensity', 'Intensidade da sombra (%)'],
@@ -1073,7 +1106,7 @@ const DockSettings = GObject.registerClass({
                 adjustment: new Gtk.Adjustment({lower: 0, upper: 200, step_increment: 5, page_increment: 10}),
             });
             this._settings.bind(key, row, 'value', Gio.SettingsBindFlags.DEFAULT);
-            list.insert(row, 4 + shadowRows.length);
+            list.insert(row, 5 + shadowRows.length);
             shadowRows.push(row);
         }
         const syncShadowControls = () => {

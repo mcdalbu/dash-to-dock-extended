@@ -10,6 +10,7 @@ import {
 } from './dependencies/gi.js';
 
 import {Main, PopupMenu} from './dependencies/shell/ui.js';
+import {getPalette} from './ptyxisPalettes.js';
 import {shellMenuSurfaceStyle} from './shellMenuStyle.js';
 
 import {
@@ -44,6 +45,21 @@ export const PositionStyleClass = Object.freeze([
     'left',
 ]);
 
+function selectedPalette() {
+    const {settings} = Docking.DockManager;
+    return settings.shellMenuColors
+        ? getPalette(settings.dockPalette,
+            St.Settings.get().color_scheme !== St.SystemColorScheme.PREFER_LIGHT)
+        : null;
+}
+
+function paletteColor(value, alpha = 255) {
+    const Color = Clutter.Color ?? Cogl.Color;
+    const [, color] = Color.from_string(value);
+    color.alpha = alpha;
+    return color;
+}
+
 function getShellMenuBox() {
     return Main.panel?.statusArea?.quickSettings?.menu?.box ??
         Main.panel?.statusArea?.dateMenu?.menu?.box;
@@ -72,14 +88,16 @@ function applyDockSurfaceStyle(dock, baseStyle, dynamicAlpha) {
             settings.dockShadowIntensity, settings.dockShadowSize);
     }
     const colorMenu = settings.shellMenuColors ? dock._themeManager?._colorMenu?.box : null;
-    if (colorMenu) {
-        const color = colorMenu.get_theme_node().get_background_color();
+    const palette = selectedPalette();
+    if (colorMenu || palette) {
+        const color = palette ? paletteColor(palette.Background)
+            : colorMenu.get_theme_node().get_background_color();
         const alpha = dynamicAlpha ?? (settings.transparencyMode === TransparencyMode.FIXED
             ? opacityFraction(settings.backgroundOpacity, 1)
             : background.get_theme_node().get_background_color().alpha / 255);
         style += `background-color: rgba(${color.red}, ${color.green}, ${color.blue}, ${alpha});`;
     }
-    if (colorMenu)
+    if (colorMenu || palette)
         style += 'background-image: none;';
     background.set_style(style);
 }
@@ -140,6 +158,8 @@ export class ThemeManager {
                 [menuBox, 'notify::style', () => this._queueUpdateShellMenuStyle()]);
         }
 
+        this._signalsHandler.add(St.Settings.get(), 'notify::color-scheme',
+            () => this._queueUpdateCustomTheme());
         this._signalsHandler.addWithLabel(Labels.THEME_CHANGED,
             St.ThemeContext.get_for_stage(global.stage), 'changed',
             () => this._queueUpdateCustomTheme(),
@@ -282,6 +302,9 @@ export class ThemeManager {
     }
 
     _getDefaultColors() {
+        const palette = selectedPalette();
+        if (palette)
+            return [paletteColor(palette.Background), paletteColor(palette.Foreground, 48)];
         const menu = Docking.DockManager.settings.shellMenuColors ? this._colorMenu?.box : null;
         if (menu) {
             const node = menu.get_theme_node();
@@ -389,7 +412,9 @@ export class ThemeManager {
         this._hoverClass ??= `shell-menu-hover-profile-${++hoverStyleId}`;
         let css = '';
         if (menuHover) {
-            const color = menuHover.get_theme_node().get_background_color();
+            const palette = selectedPalette();
+            const color = palette ? paletteColor(palette.Foreground, 32)
+                : menuHover.get_theme_node().get_background_color();
             const scope = `#dashtodockContainer.${this._hoverClass} #dash .dash-item-container`;
             css += `${scope} .app-well-app:hover .overview-icon,` +
                 `${scope} .overview-tile:hover .overview-icon,` +
@@ -478,7 +503,9 @@ export class ThemeManager {
                 this._separatorDestroyId = 0;
             });
         }
-        const color = this._colorSeparator._separator.get_theme_node().get_background_color();
+        const palette = selectedPalette();
+        const color = palette ? paletteColor(palette.Foreground, 64)
+            : this._colorSeparator._separator.get_theme_node().get_background_color();
         const original = this._separatorOriginalStyle?.trim() || '';
         const prefix = original && !original.endsWith(';') ? `${original};` : original;
         separator.set_style(`${prefix}background-color: ` +
@@ -559,6 +586,7 @@ export class ThemeManager {
 
     _bindSettingsChanges() {
         const keys = ['transparency-mode',
+            'dock-palette',
             'shell-menu-style',
             'shell-menu-colors',
             'shell-menu-keep-dock-radius',

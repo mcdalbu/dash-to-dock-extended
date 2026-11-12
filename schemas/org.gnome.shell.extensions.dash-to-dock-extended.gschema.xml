@@ -51,6 +51,10 @@
     <value value='9' nick='DOT'/>
   </enum>
   <schema path="/org/gnome/shell/extensions/dash-to-dock-soft/" id="org.gnome.shell.extensions.dash-to-dock-extended">
+    <key type="s" name="dock-palette">
+      <default>'shell'</default>
+      <summary>Shell theme or Ptyxis palette for dock colors</summary>
+    </key>
     <key type="b" name="shell-menu-style">
       <default>true</default>
       <summary>Shell menu borders and corners</summary>
