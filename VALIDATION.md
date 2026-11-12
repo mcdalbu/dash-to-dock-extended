@@ -1,3 +1,12 @@
+# Validação da versão 34 — 12 de novembro de 2026
+
+- `make check`: PASS.
+- `/usr/bin/python3 tests/palettes-headless.py`: PASS, GNOME Shell 51.1 em sessão isolada.
+- Cor computada dos quatro lados da borda verificada nas 244 paletas, com preservação da espessura.
+- Troca automática da borda clara/escura e retorno às cores nativas do Shell: PASS.
+- Opacidade do fundo e preferências GTK: PASS.
+- Resultado: `validation/shell-menu-palettes-v34-results.json`.
+
 # Validação da versão 33 — 12 de novembro de 2026
 
 - `make check`: PASS (estilos, posicionamento, redraw, layout e ESLint).

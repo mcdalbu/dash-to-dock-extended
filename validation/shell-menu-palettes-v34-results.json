@@ -1,0 +1,14 @@
+{
+  "catalog-244": true,
+  "all-palettes-apply-with-opacity": true,
+  "light-border": true,
+  "light-palette": true,
+  "dark-border": true,
+  "dark-palette": true,
+  "shell-border-restored": true,
+  "invalid-falls-back-to-shell": true,
+  "disable-restores-hover": true,
+  "preferences-output": "Dock preferences: blur/icon-shadow/manual-outline controls removed; optional outer shadow works; central preferences button exists\n\n(gjs:11327): Gjs-WARNING **: 11:50:18.668: Type GITypeInfo of property Gtk.Grid::column-spacing does not match return type GITypeInfo of getter get_column_spacing. Falling back to slow path\n\n(gjs:11327): Gjs-WARNING **: 11:50:18.668: Type GITypeInfo of property Gtk.Grid::column-spacing does not match type GITypeInfo of first argument of setter set_column_spacing. Falling back to slow path\n\n(gjs:11327): Gjs-WARNING **: 11:50:18.668: Type GITypeInfo of property Gtk.Grid::row-spacing does not match return type GITypeInfo of getter get_row_spacing. Falling back to slow path\n\n(gjs:11327): Gjs-WARNING **: 11:50:18.668: Type GITypeInfo of property Gtk.Grid::row-spacing does not match type GITypeInfo of first argument of setter set_row_spacing. Falling back to slow path\n\n(gjs:11327): Gtk-WARNING **: 11:50:22.562: Finalizing GtkCheckButton 0x55fb0b778a70, but it still has children left:\n   - GtkLabel 0x55fb0b779a00\n\n(gjs:11327): Gtk-WARNING **: 11:50:22.562: Finalizing GtkCheckButton 0x55fb0b77a5b0, but it still has children left:\n   - GtkLabel 0x55fb0b77b0c0\n\n(gjs:11327): Gtk-WARNING **: 11:50:22.562: Finalizing GtkCheckButton 0x55fb0b792170, but it still has children left:\n   - GtkLabel 0x55fb0b793050\n",
+  "preferences": true,
+  "passed": true
+}

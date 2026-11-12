@@ -1,4 +1,4 @@
-> Versão estável [33](RELEASE_NOTES.md), com visual dos menus do Shell. A sombra externa é opcional no visual dos menus do Shell. Blur e sombra dos ícones são fornecidos pelo GNOME Extended.
+> Versão estável [34](RELEASE_NOTES.md), com visual dos menus do Shell. A sombra externa é opcional no visual dos menus do Shell. Blur e sombra dos ícones são fornecidos pelo GNOME Extended.
 
 # Dash to Dock Extended
 
@@ -9,7 +9,7 @@ menus de notificações/calendário e Quick Settings do GNOME Shell.
 - **Nome:** Dash to Dock Extended
 - **UUID:** `dash-to-dock-extended@local`
 - **Schema:** `org.gnome.shell.extensions.dash-to-dock-extended`
-- **Versão deste fork:** 33
+- **Versão deste fork:** 34
 - **Repositório:** [mcdalbu/dash-to-dock-extended](https://github.com/mcdalbu/dash-to-dock-extended)
 
 Esta versão adota o nome Dash to Dock Extended e um novo UUID e schema.
@@ -205,3 +205,6 @@ Esta versão inclui GNOME Shell 51 nos metadados. O teste integrado de menus, ap
 ## Renomeação
 
 A extensão usa o novo nome e UUID. O caminho de armazenamento dconf foi preservado para manter as preferências existentes. Ao instalar o novo UUID, desative a extensão de nome antigo antes de ativar a nova.
+
+A borda acompanha a paleta selecionada, preservando sua espessura e os cantos.
+Com **Tema do Shell**, a borda usa novamente a cor do tema nativo.

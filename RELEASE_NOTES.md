@@ -1,3 +1,10 @@
+# Dash to Dock Extended 34 — 12 de novembro de 2026
+
+- A cor da borda acompanha a paleta selecionada na aba Temas, inclusive nas variantes clara e escura.
+- Espessura da borda, cantos e sombra mantêm seus controles existentes. A opção Tema do Shell restaura a borda do Shell.
+
+Instale `dash-to-dock-extended@local_v34.zip` com `gnome-extensions install --force`. Saia da sessão e entre novamente para carregar o código.
+
 # Dash to Dock Extended 33 — 12 de novembro de 2026
 
 - Nova aba **Temas**, com a opção **Tema do Shell** e as 244 paletas incorporadas do Ptyxis 50.1 em uma lista pesquisável.

@@ -99,6 +99,12 @@ function applyDockSurfaceStyle(dock, baseStyle, dynamicAlpha) {
     }
     if (colorMenu || palette)
         style += 'background-image: none;';
+    // Apply palette colors after the per-side Shell borders so they cannot
+    // overwrite the selected theme. Keep the existing widths and corner radii.
+    if (palette) {
+        const color = paletteColor(palette.Foreground, 48);
+        style += `border-color: rgba(${color.red}, ${color.green}, ${color.blue}, ${color.alpha / 255});`;
+    }
     background.set_style(style);
 }
 
