@@ -1,3 +1,9 @@
+# Dash to Dock Extended 1.0.0 — 13 de novembro de 2026
+
+Primeira versão 1.0 estável, baseada na versão 34, sem alterações funcionais. Inclui as paletas do Ptyxis, bordas e cantos dos menus do Shell e integração opcional com GNOME Shell Extended para blur e sombras.
+
+Instale o ZIP da release com `gnome-extensions install --force`. Saia da sessão e entre novamente para carregar o código.
+
 # Dash to Dock Extended 34 — 12 de novembro de 2026
 
 - A cor da borda acompanha a paleta selecionada na aba Temas, inclusive nas variantes clara e escura.
